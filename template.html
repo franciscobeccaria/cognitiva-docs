@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[Document Title] — Cognitiva.</title>
+<!--
+  docs-generator markdown template — Cognitiva. design system
+  Variant: paginated layout, markdown-only content per page.
+  Layout: 3-column flex (centered), left sidebar collapsible, right "On this page"
+  Pages: left sidebar switches pages (identical to docs-single.html).
+         Each page contains only .prose — no custom components allowed.
+  Prose elements allowed: h2 h3 p ul ol li table blockquote pre code strong em hr
+  Banned in .prose: LawBlock DoDont AntiPattern RuleCard PatternVisual KPI Pipeline TL;DR Mermaid
+  Fonts: Fraunces (headings) · Inter (body) · JetBrains Mono (code/labels)
+  Colors: cognitiva-generator OKLCH tokens (identical to docs-single.html)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — cognitiva-generator OKLCH (identical to docs-single.html)
+   ============================================================ */
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  --color-paper:       oklch(0.985 0.005 80);
+  --color-surface:     oklch(1 0 0);
+  --color-surface2:    oklch(0.97 0.008 80);
+  --color-surface3:    oklch(0.93 0.012 70);
+  --color-rule:        oklch(0.87 0.01 60);
+  --color-border:      rgba(0,0,0,0.07);
+  --color-border-hi:   rgba(0,0,0,0.13);
+
+  --color-ink:         oklch(0.18 0.01 60);
+  --color-muted:       oklch(0.50 0.01 60);
+  --color-faint:       oklch(0.72 0.01 60);
+
+  --color-accent:      oklch(0.55 0.18 28);
+  --color-accent-soft: oklch(0.95 0.035 30);
+  --color-teal:        oklch(0.55 0.14 165);
+  --color-teal-soft:   oklch(0.96 0.02 165);
+
+  --sidebar-w: 260px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper:       oklch(0.16 0.01 60);
+    --color-surface:     oklch(0.19 0.012 60);
+    --color-surface2:    oklch(0.22 0.012 60);
+    --color-surface3:    oklch(0.26 0.012 60);
+    --color-rule:        oklch(0.27 0.01 60);
+    --color-border:      rgba(255,255,255,0.08);
+    --color-border-hi:   rgba(255,255,255,0.15);
+    --color-ink:         oklch(0.91 0.005 60);
+    --color-muted:       oklch(0.65 0.008 60);
+    --color-faint:       oklch(0.42 0.008 60);
+    --color-accent:      oklch(0.72 0.14 28);
+    --color-accent-soft: oklch(0.25 0.06 28);
+    --color-teal:        oklch(0.7 0.12 165);
+    --color-teal-soft:   oklch(0.22 0.05 165);
+  }
+}
+
+/* ============================================================
+   RESET + BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   LAYOUT — centered flex container (identical to docs-single.html)
+   ============================================================ */
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ============================================================
+   LEFT SIDEBAR (identical to docs-single.html)
+   ============================================================ */
+.sidebar-left {
+  flex-shrink: 0;
+  width: var(--sidebar-w);
+  overflow: clip;
+}
+.sidebar-left.is-closing {
+  transition: width 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+.sidebar-left.is-opening {
+  transition: width 0.42s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.sidebar-left.closed { width: 0; }
+.main {
+  border-left: 1px solid var(--color-rule);
+  transition: border-left-color 0.2s ease;
+}
+.sidebar-left.closed ~ .main { border-left-color: transparent; }
+
+.sidebar-inner {
+  width: var(--sidebar-w);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  padding-bottom: 40px;
+}
+.sidebar-inner::-webkit-scrollbar { display: none; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 700;
+  color: var(--color-ink); letter-spacing: -0.4px;
+}
+.brand-dot { color: #dc2626; }
+
+.sidebar-toggle {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border: 1px solid var(--color-border);
+  background: transparent; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-faint);
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+}
+.sidebar-toggle:hover { background: var(--color-surface2); color: var(--color-muted); border-color: var(--color-border-hi); }
+.sidebar-toggle svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+.doc-identity { padding: 16px 16px 0; }
+.doc-identity-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--color-ink); line-height: 1.35; margin-bottom: 5px;
+}
+.doc-identity-desc {
+  font-size: 11.5px; color: var(--color-muted); line-height: 1.5;
+}
+
+.sidebar-nav { padding: 18px 10px 0; }
+.nav-section { margin-bottom: 18px; }
+.nav-section-title {
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 600;
+  color: var(--color-ink);
+  padding: 4px 8px 6px; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-item {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 12.5px; font-weight: 400;
+  color: var(--color-muted); text-decoration: none;
+  padding: 5px 10px; border-radius: 7px; cursor: pointer;
+  transition: color 0.13s, background 0.13s;
+  margin-bottom: 1px; line-height: 1.35; user-select: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-item:hover { color: var(--color-ink); background: var(--color-surface2); }
+.nav-item.active { color: var(--color-accent); background: var(--color-accent-soft); font-weight: 500; }
+
+/* ============================================================
+   FLOATING REOPEN BUTTON (identical to docs-single.html)
+   ============================================================ */
+.sidebar-reopen {
+  position: fixed; top: 18px; left: 12px; z-index: 400;
+  width: 28px; height: 28px;
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper); border-radius: 7px; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  color: var(--color-muted);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  transition: background 0.13s;
+}
+.sidebar-reopen:hover { background: var(--color-surface2); }
+.sidebar-reopen svg { width: 12px; height: 12px; }
+
+/* ============================================================
+   MAIN CONTENT (identical to docs-single.html)
+   ============================================================ */
+.main { flex: 1; min-width: 0; padding: 44px 52px 80px; }
+.main-inner { max-width: 720px; margin: 0 auto; }
+
+/* Page switching (identical to docs-single.html) */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.3s ease-out both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .page.active { animation: none; } }
+
+/* Page header (identical to docs-single.html) */
+.page-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+.page-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-accent); margin-bottom: 12px;
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 700; letter-spacing: -1px;
+  line-height: 1.1; margin-bottom: 12px;
+  text-wrap: balance; color: var(--color-ink);
+}
+.page-desc {
+  font-size: 15px; color: var(--color-muted);
+  line-height: 1.65; font-style: italic;
+  max-width: 540px; overflow-wrap: break-word;
+}
+
+/* Doc section (identical to docs-single.html) */
+.doc-section { margin-bottom: 52px; scroll-margin-top: 20px; }
+.doc-section > h2 {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 600; letter-spacing: -0.4px;
+  color: var(--color-ink); margin-bottom: 18px;
+  line-height: 1.25; text-wrap: balance;
+}
+
+/* Prev/Next (identical to docs-single.html) */
+.page-nav {
+  display: flex; gap: 12px; margin-top: 40px;
+  padding-top: 24px; border-top: 1px solid var(--color-border);
+}
+.page-nav-btn {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 9px; padding: 12px 16px; cursor: pointer;
+  transition: border-color 0.14s, background 0.14s;
+  text-align: left; min-width: 0; font: inherit;
+}
+.page-nav-btn.next { text-align: right; }
+.page-nav-btn:hover { border-color: var(--color-border-hi); background: var(--color-surface2); }
+.page-nav-dir { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+.page-nav-label { font-size: 13px; font-weight: 500; color: var(--color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============================================================
+   PROSE — the only component in the markdown template.
+   Each .page contains one or more .doc-section > h2 + .prose blocks.
+   All content inside .prose must be standard HTML markdown equivalents.
+   Allowed: p strong em h3 ul ol li blockquote table pre code hr
+   ============================================================ */
+.prose { min-width: 0; }
+
+/* Vertical rhythm */
+.prose > * + * { margin-top: 18px; }
+
+/* Paragraphs */
+.prose p {
+  font-size: 14.5px; color: var(--color-muted);
+  line-height: 1.78; overflow-wrap: break-word;
+}
+.prose p:last-child { margin-bottom: 0; }
+
+/* Inline formatting */
+.prose strong { color: var(--color-ink); font-weight: 600; }
+.prose em { font-style: italic; }
+
+/* Subsection heading — use h3 only when a section has 2+ distinct sub-topics */
+.prose h3 {
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 600;
+  color: var(--color-ink);
+  margin-top: 28px; margin-bottom: 8px;
+  letter-spacing: -0.1px;
+}
+
+/* Lists — use when items scan better as a list than as prose; not for decoration */
+.prose ul,
+.prose ol {
+  padding-left: 20px;
+  color: var(--color-muted);
+  font-size: 14.5px; line-height: 1.7;
+}
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li { margin-bottom: 5px; overflow-wrap: break-word; }
+.prose li:last-child { margin-bottom: 0; }
+.prose li > ul,
+.prose li > ol { margin-top: 5px; }
+
+/* Blockquote — for a standalone idea worth pausing on; use sparingly */
+.prose blockquote {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft);
+  border-radius: 0 8px 8px 0;
+  padding: 13px 18px;
+  font-family: var(--font-display);
+  font-size: 15px; font-style: italic;
+  color: var(--color-muted); line-height: 1.7;
+  overflow-wrap: break-word;
+}
+.prose blockquote p {
+  font-size: 15px; font-family: var(--font-display);
+  font-style: italic; color: var(--color-muted); margin: 0;
+}
+.prose blockquote cite {
+  display: block; margin-top: 8px;
+  font-size: 10px; font-style: normal;
+  font-family: var(--font-mono);
+  color: var(--color-faint); letter-spacing: 0.07em;
+}
+
+/* Tables — use only when comparing 3+ items across 2+ attributes */
+.prose .table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.prose table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.prose thead th {
+  background: var(--color-surface2);
+  padding: 9px 14px; text-align: left;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border); white-space: nowrap;
+}
+.prose tbody tr { border-bottom: 1px solid var(--color-border); transition: background 0.1s; }
+.prose tbody tr:last-child { border-bottom: none; }
+.prose tbody tr:hover { background: var(--color-surface2); }
+.prose td {
+  padding: 9px 14px; color: var(--color-muted);
+  vertical-align: top; min-width: 0;
+  overflow-wrap: break-word; line-height: 1.55;
+}
+.prose td:first-child { color: var(--color-ink); font-weight: 500; }
+
+/* Code blocks */
+.prose pre {
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  font-family: var(--font-mono);
+  font-size: 12px; line-height: 1.7;
+  padding: 14px 16px; overflow-x: auto;
+}
+.prose pre code {
+  font-family: var(--font-mono); font-size: inherit;
+  background: none; border: none; padding: 0; color: var(--color-ink);
+}
+
+/* Inline code */
+.prose code {
+  font-family: var(--font-mono); font-size: 11.5px;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  padding: 1px 5px; border-radius: 3px;
+  color: var(--color-ink);
+}
+
+/* Horizontal rule */
+.prose hr { border: none; border-top: 1px solid var(--color-border); }
+
+/* ============================================================
+   DIVIDER + FOOTER
+   ============================================================ */
+.divider { border: none; border-top: 1px solid var(--color-border); margin: 40px 0; }
+.doc-footer {
+  padding-top: 24px; border-top: 1px solid var(--color-border);
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--color-faint); text-align: center; line-height: 1.7;
+}
+
+/* ============================================================
+   RIGHT SIDEBAR — On this page (identical to docs-single.html)
+   ============================================================ */
+.sidebar-right-col { flex-shrink: 0; width: 200px; }
+.sidebar-right {
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; scrollbar-width: none;
+  padding: 48px 16px 32px 12px;
+}
+.sidebar-right::-webkit-scrollbar { display: none; }
+.otp-label {
+  font-family: var(--font-body);
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-faint); margin-bottom: 10px;
+}
+#on-this-page {
+  position: relative;
+  border-left: 1px solid var(--color-rule);
+}
+.otp-indicator {
+  position: absolute; left: -1px; top: 0; bottom: 0; width: 2px;
+  background: var(--color-accent); pointer-events: none;
+  clip-path: polygon(
+    0 var(--otp-top, 0px), 100% var(--otp-top, 0px),
+    100% calc(var(--otp-top, 0px) + var(--otp-height, 0px)),
+    0 calc(var(--otp-top, 0px) + var(--otp-height, 0px))
+  );
+  transition: clip-path 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.otp-link {
+  display: block;
+  font-family: var(--font-body); font-size: 12px;
+  color: var(--color-muted); text-decoration: none;
+  padding: 3.5px 8px 3.5px 12px;
+  line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: color 0.12s;
+}
+.otp-link:hover { color: var(--color-ink); }
+.otp-link.active { color: var(--color-accent); font-weight: 500; }
+
+/* ============================================================
+   RESPONSIVE (identical to docs-single.html)
+   ============================================================ */
+@media (max-width: 1000px) {
+  .layout { flex-direction: column; }
+  .sidebar-left {
+    width: 100% !important; height: auto;
+    position: relative; border-right: none;
+    border-bottom: 1px solid var(--color-rule); transition: none;
+  }
+  .sidebar-left.closed { width: 100% !important; }
+  .sidebar-inner {
+    width: 100%; position: static; height: auto;
+    flex-direction: row; align-items: center;
+    flex-wrap: nowrap; padding: 10px 14px;
+    overflow-x: auto; overflow-y: visible;
+  }
+  .brand { padding: 0; border-bottom: none; flex-shrink: 0; margin-right: 12px; }
+  .sidebar-toggle { display: none; }
+  .sidebar-reopen { display: none !important; }
+  .doc-identity { padding: 0; display: none; }
+  .sidebar-nav { padding: 0; display: flex; gap: 2px; flex-shrink: 0; }
+  .nav-section-title { display: none; }
+  .nav-item { flex-shrink: 0; font-size: 12px; padding: 5px 9px; }
+  .sidebar-right-col { display: none; }
+  .main { padding: 24px 20px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Floating reopen button -->
+<button class="sidebar-reopen" id="sidebar-reopen" onclick="toggleSidebar()" title="Open sidebar" aria-label="Open sidebar">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6,3 11,8 6,13"/>
+  </svg>
+</button>
+
+<div class="layout" id="layout">
+
+  <!-- ==================== LEFT SIDEBAR ====================
+       Identical structure to docs-single.html.
+       Each .nav-item maps to a .page via data-page attribute.
+       Page names are arbitrary — use slugs that match the content.
+  -->
+  <aside class="sidebar-left" id="sidebar-left">
+    <div class="sidebar-inner">
+
+      <!-- BRAND — NEVER CHANGE. Always "Cognitiva." -->
+      <div class="brand">
+        <span class="brand-name">Cognitiva<span class="brand-dot">.</span></span>
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Collapse sidebar" aria-label="Collapse sidebar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="10,3 5,8 10,13"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- .doc-identity-title → document title, ≤5 words
+           .doc-identity-desc → brief description, ≤20 words -->
+      <div class="doc-identity">
+        <div class="doc-identity-title">[Document Title]</div>
+        <div class="doc-identity-desc">Short description of what this document covers and who it's for.</div>
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <a class="nav-item active" data-page="intro">Introduction</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Core Concepts</div>
+          <a class="nav-item" data-page="s1">[Section One]</a>
+          <a class="nav-item" data-page="s2">[Section Two]</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reference</div>
+          <a class="nav-item" data-page="s3">[Section Three]</a>
+          <a class="nav-item" data-page="conclusion">Conclusion</a>
+        </div>
+
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT ====================
+       Each .page is a separate markdown document.
+       Structure per page:
+         .page-header  → eyebrow + title + desc (identical to docs-single.html)
+         .doc-section  → h2[id] + .prose (repeat as needed per page)
+         .page-nav     → prev/next buttons (identical to docs-single.html)
+
+       Inside .prose, use ONLY:
+         p · strong · em · h3 · ul · ol · li
+         blockquote · .table-wrap > table · pre > code · code · hr
+
+       Every h2 MUST have an id — the right TOC reads h2[id].
+       No more than 2–3 paragraphs before a visual break.
+       Abstract sections must include at least one real-world example.
+  -->
+  <main class="main" id="main">
+  <div class="main-inner">
+
+    <!-- ===== PAGE: INTRO =====
+         Always first. Sets the frame and the core question.
+         Intro: one .doc-section per major idea. Usually 2 sections.
+         No subsections (h3) needed here — keep it tight.
+    -->
+    <div class="page active" id="page-intro">
+      <header class="page-header">
+        <!-- page-eyebrow: "Cognitiva. · [Short topic label]" — always this pattern -->
+        <div class="page-eyebrow">Cognitiva. · [Short topic label]</div>
+        <h1 class="page-title">[Document Title]</h1>
+        <!-- page-desc: one italic sentence — the core question this document answers -->
+        <p class="page-desc">One sentence that states what this document is about. No filler. No build-up.</p>
+      </header>
+
+      <div class="doc-section">
+        <h2 id="intro-overview">Overview</h2>
+        <div class="prose">
+          <p>Opening paragraph. States the core claim directly. One to three sentences. After reading this paragraph, the reader should understand the document's purpose. No academic framing, no filler openers.</p>
+          <p>Second paragraph if needed. Use <strong>bold</strong> for key terms on first mention — the concepts the reader must retain. Keep sentences under ~25 words. Remove anything that could be cut without changing meaning.</p>
+
+          <!-- blockquote: a standalone idea that anchors the section.
+               Use sparingly — one per page maximum.
+               If you need to explain it, the quote is wrong. -->
+          <blockquote>
+            A key axiom, principle, or tension that frames the document. Short, precise, and self-contained.
+            <cite>Source or attribution if applicable</cite>
+          </blockquote>
+
+          <p>Brief follow-up. One paragraph. Connects the idea above to the next section.</p>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2 id="intro-context">Context</h2>
+        <div class="prose">
+          <p>Contextual paragraph. Why this matters now. What prompted this document. Sets up the content pages without repeating the overview.</p>
+          <p>Second paragraph if needed. Ends with a forward-looking sentence that transitions naturally to the first content page.</p>
+        </div>
+      </div>
+
+      <div class="page-nav">
+        <div style="flex:1"></div>
+        <button class="page-nav-btn next" onclick="switchPage('s1')">
+          <span class="page-nav-dir">Next →</span>
+          <span class="page-nav-label">[Section One]</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: S1 — Content page with list and table =====
+         Use this pattern for a section that benefits from lists and/or a comparison table.
+         Two or three .doc-section blocks per page is the right density.
+    -->
+    <div class="page" id="page-s1">
+      <header class="page-header">
+        <div class="page-eyebrow">01 — [Section One]</div>
+        <h1 class="page-title">[Section title, 3–6 words]</h1>
+        <p class="page-desc">One sentence describing what this page covers and why it matters to the document's argument.</p>
+      </header>
+
+      <div class="doc-section">
+        <h2 id="s1-concepts">Core concepts</h2>
+        <div class="prose">
+          <p>Lead sentence. States the core idea of this section directly. No build-up.</p>
+          <p>Body paragraph. Develops the idea. <strong>Key term</strong> bolded on first use. Technical vocabulary intact — never simplify at the cost of precision.</p>
+
+          <!-- ul: use when items are parallel, non-sequential, and scan better as a list.
+               Do not list for decoration. 4–6 items is the right range. -->
+          <ul>
+            <li>First item — short, parallel, and self-contained</li>
+            <li>Second item — each line carries its own weight</li>
+            <li>Third item — avoid noun-phrase-only bullets with no meaningful content</li>
+            <li>Fourth item — if prose flows naturally, use prose instead</li>
+          </ul>
+
+          <p>Follow-up paragraph if needed. Context the list can't carry. One paragraph maximum after a list.</p>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2 id="s1-comparison">Comparison</h2>
+        <div class="prose">
+          <p>Lead sentence for the comparison. What is being compared and why the distinction matters.</p>
+
+          <!-- .table-wrap: required wrapper for overflow + border-radius.
+               Use a table when comparing 3+ items across 2+ attributes.
+               If comparing 2 items or fewer than 3 rows, write it inline instead. -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Concept</th><th>What it means</th><th>When to apply</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>[Concept A]</td><td>Concise definition or implication</td><td>Specific context or condition</td></tr>
+                <tr><td>[Concept B]</td><td>Concise definition or implication</td><td>Specific context or condition</td></tr>
+                <tr><td>[Concept C]</td><td>Concise definition or implication</td><td>Specific context or condition</td></tr>
+                <tr><td>[Concept D]</td><td>Concise definition or implication</td><td>Specific context or condition</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Closing paragraph. What the table means in practice. The non-obvious implication.</p>
+        </div>
+      </div>
+
+      <div class="page-nav">
+        <button class="page-nav-btn" onclick="switchPage('intro')">
+          <span class="page-nav-dir">← Previous</span>
+          <span class="page-nav-label">Introduction</span>
+        </button>
+        <button class="page-nav-btn next" onclick="switchPage('s2')">
+          <span class="page-nav-dir">Next →</span>
+          <span class="page-nav-label">[Section Two]</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: S2 — Content page with subsections and example =====
+         Use h3 when a section has 2+ distinct sub-topics that each need a heading.
+         Don't fragment a single idea into sub-headings.
+         Every abstract section must include a real-world example.
+    -->
+    <div class="page" id="page-s2">
+      <header class="page-header">
+        <div class="page-eyebrow">02 — [Section Two]</div>
+        <h1 class="page-title">[Section title, 3–6 words]</h1>
+        <p class="page-desc">One sentence describing what this page covers.</p>
+      </header>
+
+      <div class="doc-section">
+        <h2 id="s2-main">Main topic</h2>
+        <div class="prose">
+          <p>Lead sentence. <strong>Key concept</strong> introduced and bolded on first use.</p>
+
+          <!-- h3: only when 2+ distinct sub-topics each need their own heading -->
+          <h3>[Sub-topic A]</h3>
+          <p>Body for sub-topic A. Precise and compressed. Each paragraph makes exactly one claim.</p>
+
+          <!-- ol: use for sequences or ranked items where order matters -->
+          <ol>
+            <li>First step or ranked item — order conveys meaning here</li>
+            <li>Second step — use ol for sequences, ul for non-sequential sets</li>
+            <li>Third step — stop at the point where the pattern is clear</li>
+          </ol>
+
+          <h3>[Sub-topic B]</h3>
+          <p>Body for sub-topic B. Same compression standard. One idea per paragraph.</p>
+
+          <!-- Real-world example: always named product, platform, or measurable outcome.
+               Never hypothetical. Required on every abstract section. -->
+          <p><strong>Example —</strong> Concrete example referencing a real product, tool, or measurable outcome. One to three sentences. "Gmail's Compose button occupies the bottom-left" is the right level of specificity — not "a button that is large enough".</p>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2 id="s2-code">Code and syntax</h2>
+        <div class="prose">
+          <p>Use <code>inline code</code> for technical terms, commands, config keys, or values that must be reproduced exactly. Not for emphasis — that's what <strong>bold</strong> is for.</p>
+
+          <!-- pre > code: only for code, commands, or verbatim output -->
+          <pre><code>[command or code snippet]
+# Comment explaining what this does
+output: expected result</code></pre>
+
+          <p>Follow-up paragraph explaining the code block above. What to look for, what to change, what to avoid.</p>
+        </div>
+      </div>
+
+      <div class="page-nav">
+        <button class="page-nav-btn" onclick="switchPage('s1')">
+          <span class="page-nav-dir">← Previous</span>
+          <span class="page-nav-label">[Section One]</span>
+        </button>
+        <button class="page-nav-btn next" onclick="switchPage('s3')">
+          <span class="page-nav-dir">Next →</span>
+          <span class="page-nav-label">[Section Three]</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: S3 — Dense content page =====
+         Shows blockquote + table + mixed formatting together.
+         Use for operational rules, failure modes, or reference material.
+    -->
+    <div class="page" id="page-s3">
+      <header class="page-header">
+        <div class="page-eyebrow">03 — [Section Three]</div>
+        <h1 class="page-title">[Section title, 3–6 words]</h1>
+        <p class="page-desc">One sentence describing what this page covers.</p>
+      </header>
+
+      <div class="doc-section">
+        <h2 id="s3-rules">Rules and principles</h2>
+        <div class="prose">
+          <p>Lead sentence. What this section establishes and why it matters.</p>
+
+          <blockquote>
+            A principle or rule that anchors this section. Short, precise, and self-contained. No explanation needed.
+          </blockquote>
+
+          <p>Follow-up paragraph. Connects the principle to the concrete content below. One paragraph. No filler transitions.</p>
+
+          <ul>
+            <li><strong>Rule name</strong> — Short description. One or two sentences. Directly actionable.</li>
+            <li><strong>Rule name</strong> — Second rule. Use bold for the rule name, prose for the description.</li>
+            <li><strong>Rule name</strong> — Third rule. Each item is self-contained — no cross-references needed.</li>
+            <li><strong>Rule name</strong> — Fourth rule. Stop when the list is complete, not when it feels long enough.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2 id="s3-reference">Quick reference</h2>
+        <div class="prose">
+          <p>A two-column table works well for term/definition or name/description pairs.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Item</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>[Item A]</td><td>Two-column tables suit term/definition or name/description pairs</td></tr>
+                <tr><td>[Item B]</td><td>First column: noun — what, who, or which. Second column: the explanation</td></tr>
+                <tr><td>[Item C]</td><td>If more than 5–6 rows, consider whether a prose list is actually clearer</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-nav">
+        <button class="page-nav-btn" onclick="switchPage('s2')">
+          <span class="page-nav-dir">← Previous</span>
+          <span class="page-nav-label">[Section Two]</span>
+        </button>
+        <button class="page-nav-btn next" onclick="switchPage('conclusion')">
+          <span class="page-nav-dir">Next →</span>
+          <span class="page-nav-label">Conclusion</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: CONCLUSION =====
+         Always last. Not a summary — a synthesis.
+         Closes the document with compression, not repetition.
+         The reader should feel the document is complete after this page.
+    -->
+    <div class="page" id="page-conclusion">
+      <header class="page-header">
+        <div class="page-eyebrow">Conclusion</div>
+        <h1 class="page-title">Synthesis</h1>
+        <p class="page-desc">What it all adds up to — the one thing to carry forward.</p>
+      </header>
+
+      <div class="doc-section">
+        <h2 id="conclusion-synthesis">Key takeaways</h2>
+        <div class="prose">
+          <p>Synthesis paragraph. Draws the thread across the whole document. What does it all add up to? What should the reader think or do differently? Not a list of what was covered — the single most important takeaway, stated with precision.</p>
+
+          <!-- Closing list: dense, actionable. 3–5 items. Each is a complete thought, not a noun phrase. -->
+          <ul>
+            <li><strong>Takeaway one</strong> — the most important finding, stated as a complete claim</li>
+            <li><strong>Takeaway two</strong> — the actionable implication, what to do differently</li>
+            <li><strong>Takeaway three</strong> — the counterintuitive or non-obvious finding</li>
+            <li><strong>Takeaway four</strong> — the condition under which the main advice does not apply</li>
+          </ul>
+
+          <p>Final closing sentence. Strong, precise, not generic. The document ends here.</p>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <footer class="doc-footer">
+        Generated by <strong>Cognitiva<span style="color:#dc2626">.</span></strong> docs-generator &nbsp;·&nbsp; output → <code>~/.agent/docs/</code>
+      </footer>
+
+      <div class="page-nav" style="margin-top: 24px;">
+        <button class="page-nav-btn" onclick="switchPage('s3')">
+          <span class="page-nav-dir">← Previous</span>
+          <span class="page-nav-label">[Section Three]</span>
+        </button>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+
+  </div><!-- /main-inner -->
+  </main>
+
+  <!-- ==================== RIGHT SIDEBAR ==================== -->
+  <div class="sidebar-right-col">
+    <aside class="sidebar-right" id="sidebar-right">
+      <div class="otp-label">On this page</div>
+      <nav id="on-this-page"></nav>
+    </aside>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- Prism.js — code block syntax highlighting -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+<!-- App logic — identical to docs-single.html, Mermaid removed -->
+<script>
+/* ---- Page registry ---- */
+var pages = {};
+document.querySelectorAll('.page').forEach(function(p) {
+  pages[p.id.replace('page-', '')] = p;
+});
+
+/* ---- Switch page ---- */
+function switchPage(id) {
+  Object.values(pages).forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(a) { a.classList.remove('active'); });
+  var page = pages[id]; if (!page) return;
+  page.classList.add('active');
+  var nav = document.querySelector('[data-page="' + id + '"]');
+  if (nav) nav.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  buildTOC(id);
+}
+
+/* ---- Right TOC builder (Fumadocs-style — identical to docs-single.html) ---- */
+var tocObserver = null;
+function buildTOC(pageId) {
+  var page = pages[pageId];
+  var toc  = document.getElementById('on-this-page');
+  toc.innerHTML = '';
+  if (!page) return;
+
+  var indicator = document.createElement('div');
+  indicator.className = 'otp-indicator';
+  toc.appendChild(indicator);
+
+  var headings = Array.from(page.querySelectorAll('h2[id]'));
+
+  var missingId = Array.from(page.querySelectorAll('h2')).filter(function(h) { return !h.id; });
+  if (missingId.length) console.warn('[docs-generator] h2 missing id — TOC will be incomplete:', missingId);
+
+  headings.forEach(function(h) {
+    var a = document.createElement('a');
+    a.href = '#' + h.id; a.className = 'otp-link';
+    a.textContent = h.textContent;
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    toc.appendChild(a);
+  });
+
+  if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+  if (headings.length === 0) return;
+
+  var links = Array.from(toc.querySelectorAll('.otp-link'));
+  var visibleSet = new Set();
+
+  function moveIndicator(activeLinks) {
+    if (activeLinks.length === 0) { indicator.style.setProperty('--otp-height', '0px'); return; }
+    var first = activeLinks[0];
+    var last  = activeLinks[activeLinks.length - 1];
+    var pt = parseFloat(getComputedStyle(first).paddingTop);
+    var pb = parseFloat(getComputedStyle(last).paddingBottom);
+    var top    = first.offsetTop + pt;
+    var bottom = last.offsetTop + last.clientHeight - pb;
+    indicator.style.setProperty('--otp-top',    top + 'px');
+    indicator.style.setProperty('--otp-height', (bottom - top) + 'px');
+  }
+
+  function applyActive() {
+    var activeLinks;
+    if (visibleSet.size > 0) {
+      links.forEach(function(l) {
+        l.classList.toggle('active', visibleSet.has(l.getAttribute('href').slice(1)));
+      });
+      activeLinks = links.filter(function(l) { return l.classList.contains('active'); });
+    } else {
+      var passed = headings.filter(function(h) { return h.getBoundingClientRect().top <= 0; });
+      var target = passed.length > 0 ? passed[passed.length - 1] : headings[0];
+      links.forEach(function(l) { l.classList.remove('active'); });
+      var match = links.find(function(l) { return l.getAttribute('href') === '#' + target.id; });
+      if (match) match.classList.add('active');
+      activeLinks = match ? [match] : [];
+    }
+    moveIndicator(activeLinks);
+  }
+
+  tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) { visibleSet.add(entry.target.id); }
+      else                      { visibleSet.delete(entry.target.id); }
+    });
+    applyActive();
+  }, { rootMargin: '0px 0px 0px 0px', threshold: 0 });
+
+  headings.forEach(function(h) { tocObserver.observe(h); });
+  applyActive();
+}
+
+/* ---- Nav item clicks ---- */
+document.querySelectorAll('.nav-item').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault(); switchPage(this.dataset.page);
+  });
+});
+
+/* ---- Sidebar toggle (directional spring — identical to docs-single.html) ---- */
+function toggleSidebar() {
+  var sidebar = document.getElementById('sidebar-left');
+  var reopen  = document.getElementById('sidebar-reopen');
+  var isOpen  = !sidebar.classList.contains('closed');
+  if (isOpen) {
+    sidebar.classList.remove('is-opening');
+    sidebar.classList.add('is-closing');
+    sidebar.classList.add('closed');
+    reopen.style.display = 'flex';
+  } else {
+    sidebar.classList.remove('is-closing');
+    sidebar.classList.add('is-opening');
+    sidebar.classList.remove('closed');
+    reopen.style.display = 'none';
+  }
+}
+
+/* ---- Init ---- */
+document.getElementById('sidebar-reopen').style.display = 'none';
+buildTOC('intro');
+</script>
+</body>
+</html>
