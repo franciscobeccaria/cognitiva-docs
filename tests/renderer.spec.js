@@ -212,6 +212,55 @@ test.describe('Smart Page Detection', () => {
     await expect(docTitle).toContainText('Guía de Docker');
     await snap(page, testInfo, 'doc-title-from-h1');
   });
+
+  test('# comments inside yaml code block are not counted as H1 headings', async ({ page }, testInfo) => {
+    const md = [
+      '# My Guide', '', 'Intro.',
+      '', '## Setup', '',
+      '```yaml', '# yaml comment — not a heading', 'jobs:', '  test:', '    runs-on: ubuntu-latest', '```',
+      '', '## Usage', '', 'Content here.'
+    ].join('\n');
+    const frame = await renderMarkdown(page, md);
+    const navTexts = await frame.locator('.nav-item').allTextContents();
+    // Must be H2-split (Setup, Usage) — not H1-split triggered by the yaml comment
+    expect(navTexts.some(t => t.includes('Setup'))).toBe(true);
+    expect(navTexts.some(t => t.includes('Usage'))).toBe(true);
+    await snap(page, testInfo, 'yaml-comment-not-h1');
+  });
+
+  test('## comments inside shell code block are not counted as H2 headings', async ({ page }, testInfo) => {
+    const md = [
+      '# Guide',
+      '## Section One', '',
+      '```bash', '## this is a shell comment', 'echo hello', '```',
+      '', '## Section Two', '', 'Content.'
+    ].join('\n');
+    const frame = await renderMarkdown(page, md);
+    const navTexts = await frame.locator('.nav-item').allTextContents();
+    // Only 2 real H2s — Section One and Section Two; shell comment must not appear
+    const navCount = await frame.locator('.nav-item').count();
+    expect(navCount).toBe(2);
+    expect(navTexts.some(t => t.includes('Section One'))).toBe(true);
+    expect(navTexts.some(t => t.includes('Section Two'))).toBe(true);
+    expect(navTexts.some(t => t.includes('shell comment'))).toBe(false);
+    await snap(page, testInfo, 'shell-comment-not-h2');
+  });
+
+  test('code block with heading-like content does not split page incorrectly', async ({ page }, testInfo) => {
+    const md = [
+      '# Documento', '', 'Intro.',
+      '', '## Capítulo Uno', '',
+      '```yaml', '# .github/workflows/playwright.yml', 'on:', '  push:', '    branches: [main]', '```',
+      '', '## Capítulo Dos', '', 'Segundo capítulo.'
+    ].join('\n');
+    const frame = await renderMarkdown(page, md);
+    // Doc title must be "Documento" (the real H1), not the yaml comment
+    await expect(frame.locator('.doc-identity-title')).toContainText('Documento');
+    const navTexts = await frame.locator('.nav-item').allTextContents();
+    expect(navTexts.some(t => t.includes('Capítulo Uno'))).toBe(true);
+    expect(navTexts.some(t => t.includes('Capítulo Dos'))).toBe(true);
+    await snap(page, testInfo, 'code-block-no-false-split');
+  });
 });
 
 /* ============================================================
