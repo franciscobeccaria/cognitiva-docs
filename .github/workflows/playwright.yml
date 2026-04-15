@@ -40,6 +40,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./playwright-report
           destination_dir: runs/${{ github.run_id }}
+          keep_files: true
 
       - name: Comment PR with report link
         if: github.event_name == 'pull_request'
