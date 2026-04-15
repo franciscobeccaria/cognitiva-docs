@@ -238,25 +238,65 @@ function esc(s) {
 /* ============================================================
    SMART PAGE DETECTION
    ============================================================ */
+
+// Returns a copy of md with fenced code block contents removed.
+// Used only for heading detection — original md is preserved for rendering.
+function stripCodeBlocks(md) {
+  return md
+    .replace(/^```[^\n]*\n[\s\S]*?^```[ \t]*$/gm, '')
+    .replace(/^~~~[^\n]*\n[\s\S]*?^~~~[ \t]*$/gm, '');
+}
+
+// Splits md at lines starting with prefix (e.g. '# ' or '## '),
+// skipping any occurrences inside fenced code blocks.
+function splitAtHeading(md, prefix) {
+  var lines = md.split('\n');
+  var inCode = false;
+  var openFence = null;
+  var parts = [];
+  var current = [];
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var fenceMatch = line.match(/^(`{3,}|~{3,})/);
+    if (fenceMatch && !inCode) {
+      inCode = true;
+      openFence = fenceMatch[1];
+    } else if (inCode && fenceMatch && /^(`{3,}|~{3,})[ \t]*$/.test(line) && line.trimRight().startsWith(openFence)) {
+      inCode = false;
+      openFence = null;
+    }
+    if (!inCode && line.startsWith(prefix)) {
+      if (current.length > 0) parts.push(current.join('\n'));
+      current = [];
+    }
+    current.push(line);
+  }
+  if (current.length > 0) parts.push(current.join('\n'));
+  return parts;
+}
+
 function detectSplitLevel(md) {
-  var h1s = (md.match(/^# [^\n]+/gm) || []).length;
-  var h2s = (md.match(/^## [^\n]+/gm) || []).length;
+  var clean = stripCodeBlocks(md);
+  var h1s = (clean.match(/^# [^\n]+/gm) || []).length;
+  var h2s = (clean.match(/^## [^\n]+/gm) || []).length;
   if (h1s >= 2) return 'h1';
   if (h2s >= 2) return 'h2';
   return 'none';
 }
 
 function extractDocTitle(md) {
-  var h1 = md.match(/^# (.+)/m);
+  var clean = stripCodeBlocks(md);
+  var h1 = clean.match(/^# (.+)/m);
   if (h1) return h1[1].trim();
-  var h2 = md.match(/^## (.+)/m);
+  var h2 = clean.match(/^## (.+)/m);
   if (h2) return h2[1].trim();
-  var firstLine = md.trim().split('\n')[0].replace(/^#+\s*/, '').trim();
+  var firstLine = clean.trim().split('\n')[0].replace(/^#+\s*/, '').trim();
   return firstLine.slice(0, 80) || 'Document';
 }
 
 function parsePagesAtH1(md) {
-  var parts = md.split(/^(?=# )/m);
+  var parts = splitAtHeading(md, '# ');
   var pages = [];
   var idxMap = {};
 
@@ -288,7 +328,8 @@ function parsePagesAtH2(md, docTitle) {
   var withoutH1 = md.replace(/^# [^\n]+\n?/m, '').trim();
 
   // Separate any content before the first H2 (intro block after H1)
-  var firstH2Idx = withoutH1.search(/^## /m);
+  // Use stripCodeBlocks so H2s inside code blocks don't affect the search index
+  var firstH2Idx = stripCodeBlocks(withoutH1).search(/^## /m);
   var introContent = firstH2Idx > 0 ? withoutH1.slice(0, firstH2Idx).trim() : '';
   var mainContent = firstH2Idx >= 0 ? withoutH1.slice(firstH2Idx) : withoutH1;
 
@@ -302,8 +343,8 @@ function parsePagesAtH2(md, docTitle) {
     idxMap[introSlug] = true;
   }
 
-  // Split at H2 boundaries — each H2 becomes a page
-  var parts = mainContent.split(/^(?=## )/m);
+  // Split at H2 boundaries — each H2 becomes a page (code-block-aware split)
+  var parts = splitAtHeading(mainContent, '## ');
   parts.forEach(function(part) {
     var trimmed = part.trim();
     if (!trimmed) return;
