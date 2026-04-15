@@ -66,6 +66,38 @@ Un documento corto.
 
 Solo hay una sección.`;
 
+const MD_H2_SHORT_INTRO = `# Mi Guía
+
+Esta es una descripción breve del documento.
+
+## Sección Uno
+
+Contenido de la primera sección.
+
+## Sección Dos
+
+Contenido de la segunda sección.
+
+## Sección Tres
+
+Contenido de la tercera sección.`;
+
+const MD_H2_LONG_INTRO = `# Mi Guía
+
+${'Párrafo largo. '.repeat(40)}
+
+## Sección Uno
+
+Contenido.
+
+## Sección Dos
+
+Contenido.
+
+## Sección Tres
+
+Contenido.`;
+
 // Helper: paste markdown, click Render, wait for iframe
 async function renderMarkdown(page, markdown) {
   await page.fill('#md-input', markdown);
@@ -260,6 +292,39 @@ test.describe('Smart Page Detection', () => {
     expect(navTexts.some(t => t.includes('Capítulo Uno'))).toBe(true);
     expect(navTexts.some(t => t.includes('Capítulo Dos'))).toBe(true);
     await snap(page, testInfo, 'code-block-no-false-split');
+  });
+
+  test('h2-split with short intro → shows description in sidebar, not as nav page', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_H2_SHORT_INTRO);
+    // Description element is visible and contains the blurb text
+    const desc = frame.locator('.doc-description');
+    await expect(desc).toBeVisible();
+    await expect(desc).toContainText('descripción breve');
+    // Doc title is NOT a nav item (no intro page created)
+    const navTexts = await frame.locator('.nav-item').allTextContents();
+    expect(navTexts.some(t => t.includes('Mi Guía'))).toBe(false);
+    // H2s are still nav items
+    expect(navTexts.some(t => t.includes('Sección Uno'))).toBe(true);
+    await snap(page, testInfo, 'h2-short-intro-description');
+  });
+
+  test('h2-split with long intro → intro content remains as nav page', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_H2_LONG_INTRO);
+    // No visible description
+    const desc = frame.locator('.doc-description');
+    expect(await desc.count()).toBe(0);
+    // Doc title appears as first nav item (intro page preserved)
+    const navTexts = await frame.locator('.nav-item').allTextContents();
+    expect(navTexts.some(t => t.includes('Mi Guía'))).toBe(true);
+    await snap(page, testInfo, 'h2-long-intro-page');
+  });
+
+  test('single H1 + many H2s → short intro paragraph shown as sidebar description', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
+    const desc = frame.locator('.doc-description');
+    await expect(desc).toBeVisible();
+    await expect(desc).toContainText('plataforma de contenedores');
+    await snap(page, testInfo, 'h2-docker-description');
   });
 });
 
