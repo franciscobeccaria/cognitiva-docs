@@ -466,3 +466,38 @@ Otro capítulo.`;
     await snap(page, testInfo, 'prev-next-after-next');
   });
 });
+
+/* ============================================================
+   COPY MARKDOWN
+   ============================================================ */
+test.describe('Copy Markdown', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/renderer.html');
+  });
+
+  test('copy markdown button exists in rendered doc sidebar', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
+    const btn = frame.locator('.copy-md-btn');
+    await expect(btn).toBeVisible();
+    await expect(btn).toContainText('Copy markdown');
+    await snap(page, testInfo, 'copy-md-button-visible');
+  });
+
+  test('__rawMd embedded in generated HTML matches original markdown', async ({ page }) => {
+    await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
+    const srcDoc = await page.evaluate(() => document.getElementById('preview-frame').srcdoc);
+    const expected = JSON.stringify(MD_SINGLE_H1_MANY_H2);
+    expect(srcDoc).toContain('var __rawMd=' + expected + ';');
+  });
+
+  test('clicking copy markdown button shows "Copiado" feedback', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
+    const btn = frame.locator('#copy-md-btn');
+    await btn.click();
+    await expect(btn).toContainText('Copiado');
+    await snap(page, testInfo, 'copy-md-feedback');
+    // after 2s it reverts
+    await page.waitForTimeout(2200);
+    await expect(btn).toContainText('Copy markdown');
+  });
+});

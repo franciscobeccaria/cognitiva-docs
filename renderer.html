@@ -445,7 +445,7 @@ function buildFontLinks(fontPreset) {
 /* ============================================================
    HTML GENERATION
    ============================================================ */
-function buildHTML(pages, docTitle, splitLevel, fontPreset, docDescription) {
+function buildHTML(pages, docTitle, splitLevel, fontPreset, docDescription, rawMd) {
   /* ---- Left nav ---- */
   var navHTML = pages.map(function(page, i) {
     var cls = i === 0 ? 'nav-item active' : 'nav-item';
@@ -499,7 +499,10 @@ function buildHTML(pages, docTitle, splitLevel, fontPreset, docDescription) {
     '  </div>',
     descHTML,
     '  <nav class="sidebar-nav"><div class="nav-section">' + navHTML + '</div></nav>',
-    '  <button class="back-to-editor" onclick="window.parent.postMessage(\'back\',\'*\')">← Editor</button>',
+    '  <div class="sidebar-footer">',
+    '    <button class="copy-md-btn" id="copy-md-btn" onclick="copyMarkdown()">Copy markdown</button>',
+    '    <button class="back-to-editor" onclick="window.parent.postMessage(\'back\',\'*\')">← Editor</button>',
+    '  </div>',
     '</div></aside>',
     '',
     '<!-- MAIN -->',
@@ -520,6 +523,7 @@ function buildHTML(pages, docTitle, splitLevel, fontPreset, docDescription) {
     '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"><\/script>',
     '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"><\/script>',
     '<script>',
+    'var __rawMd=' + JSON.stringify(rawMd || '').replace(/<\/script/gi, '<\\/script') + ';',
     templateJS(firstSlug, sectionTag),
     '<\/script>',
     '</body>',
@@ -649,9 +653,12 @@ function templateCSS(fontPreset) {
   '.nav-item{display:block;font-size:12.5px;font-weight:400;color:var(--color-muted);text-decoration:none;padding:5px 10px;border-radius:7px;cursor:pointer;transition:color 0.13s,background 0.13s;margin-bottom:1px;line-height:1.35;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
   '.nav-item:hover{color:var(--color-ink);background:var(--color-surface2)}' +
   '.nav-item.active{color:var(--color-accent);background:var(--color-accent-soft);font-weight:500}' +
-  // Back-to-editor button
-  '.back-to-editor{margin:auto 16px 16px;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:calc(100% - 32px)}' +
+  // Sidebar footer (copy md + back-to-editor)
+  '.sidebar-footer{margin-top:auto;padding:0 16px 16px;display:flex;flex-direction:column;gap:6px}' +
+  '.back-to-editor{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%}' +
   '.back-to-editor:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
+  '.copy-md-btn{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%}' +
+  '.copy-md-btn:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
   // Reopen
   '.sidebar-reopen{position:fixed;top:18px;left:12px;z-index:400;width:28px;height:28px;border:1px solid var(--color-rule);background:var(--color-paper);border-radius:7px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--color-muted);box-shadow:0 1px 6px rgba(0,0,0,0.08);transition:background 0.13s}' +
   '.sidebar-reopen:hover{background:var(--color-surface2)}' +
@@ -732,7 +739,7 @@ function templateCSS(fontPreset) {
     '.nav-item{flex-shrink:0;font-size:12px;padding:5px 9px}' +
     '.sidebar-right-col{display:none}' +
     '.main{padding:24px 20px 60px}' +
-    '.back-to-editor{display:none}' +
+    '.sidebar-footer{display:none}' +
   '}';
 }
 
@@ -812,6 +819,14 @@ function templateJS(firstSlug, sectionTag) {
     '  else{s.classList.remove("is-closing");s.classList.add("is-opening");s.classList.remove("closed");r.style.display="none";}\n' +
     '}\n' +
 
+    'function copyMarkdown(){\n' +
+    '  var btn=document.getElementById("copy-md-btn");\n' +
+    '  var orig=btn.textContent;\n' +
+    '  var done=function(){btn.textContent="Copiado \u2713";setTimeout(function(){btn.textContent=orig;},2000);};\n' +
+    '  if(navigator.clipboard){navigator.clipboard.writeText(__rawMd).then(done).catch(done);}\n' +
+    '  else{var ta=document.createElement("textarea");ta.value=__rawMd;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);done();}\n' +
+    '}\n' +
+
     'document.getElementById("sidebar-reopen").style.display="none";\n' +
     'buildTOC("' + firstSlug + '");\n'
   );
@@ -837,7 +852,7 @@ function renderDoc() {
   var result = smartParsePages(md);
   var checked = document.querySelector('[name="font-preset"]:checked');
   var fontPreset = checked ? checked.value : 'clean';
-  _html = buildHTML(result.pages, result.docTitle, result.splitLevel, fontPreset, result.docDescription || '');
+  _html = buildHTML(result.pages, result.docTitle, result.splitLevel, fontPreset, result.docDescription || '', md);
 
   var frame = document.getElementById('preview-frame');
   frame.srcdoc = _html;
