@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown → Cognitiva. docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== EDITOR APP STYLES ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+:root{
+  --paper:oklch(0.985 0.005 80);
+  --surface:oklch(1 0 0);
+  --surface2:oklch(0.97 0.008 80);
+  --rule:oklch(0.87 0.01 60);
+  --border:rgba(0,0,0,0.07);
+  --border-hi:rgba(0,0,0,0.13);
+  --ink:oklch(0.18 0.01 60);
+  --muted:oklch(0.50 0.01 60);
+  --faint:oklch(0.72 0.01 60);
+  --accent:oklch(0.55 0.18 28);
+  --accent-soft:oklch(0.95 0.035 30);
+  --fd:'Fraunces',Georgia,serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --fm:'JetBrains Mono',monospace;
+}
+body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+
+/* ---- Editor view ---- */
+#editor{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 60px}
+.app-header{width:100%;max-width:800px;padding:26px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:28px}
+.app-brand{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.4px}
+.app-brand .dot{color:#dc2626}
+.app-tag{font-family:var(--fm);font-size:10px;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase}
+.editor-body{width:100%;max-width:800px}
+.editor-label{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+
+#md-input{
+  width:100%;height:480px;padding:16px 18px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  font-family:var(--fm);font-size:12.5px;line-height:1.7;color:var(--ink);
+  resize:vertical;outline:none;transition:border-color 0.15s;tab-size:2;
+}
+#md-input:focus{border-color:var(--accent)}
+#md-input::placeholder{color:var(--faint)}
+
+.editor-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px}
+.editor-hint{font-size:12px;color:var(--faint)}
+.editor-hint code{font-family:var(--fm);font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--muted)}
+.actions-right{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{font-family:var(--fb);font-size:13px;font-weight:500;padding:8px 16px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:background 0.13s,border-color 0.13s,filter 0.13s;white-space:nowrap}
+.btn-ghost{background:transparent;color:var(--muted)}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--border-hi);color:var(--ink)}
+.btn-primary{background:var(--accent);color:#fff;border-color:transparent;font-weight:600}
+.btn-primary:hover{filter:brightness(1.1)}
+
+/* ---- Settings panel ---- */
+.settings-panel{margin-top:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}
+.settings-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.settings-label{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
+.font-opts{display:flex;gap:14px;flex-wrap:wrap}
+.font-opts label{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.font-opts label:hover{color:var(--ink)}
+.font-opts input[type=radio]{cursor:pointer;accent-color:var(--accent)}
+
+/* ---- Preview view ---- */
+#preview{display:none;flex-direction:column;position:fixed;inset:0;z-index:100}
+#preview-frame{flex:1;border:none;width:100%}
+</style>
+</head>
+<body>
+
+<!-- ==================== EDITOR ==================== -->
+<div id="editor">
+  <header class="app-header">
+    <span class="app-brand">Cognitiva<span class="dot">.</span></span>
+    <span class="app-tag">Markdown → docs</span>
+  </header>
+  <div class="editor-body">
+    <div class="editor-label">Paste your markdown</div>
+    <textarea id="md-input" spellcheck="false" placeholder="# Document Title
+
+Intro paragraph (optional).
+
+## Section One
+
+Each ## H2 becomes a page when there's a single # H1.
+
+## Section Two
+
+More content here.
+
+---
+
+# Page One
+# Page Two
+
+Multiple # H1 headings → each H1 becomes a page."></textarea>
+    <div class="editor-actions">
+      <span class="editor-hint">
+        One <code># H1</code> + multiple <code>## H2</code>s &rarr; each H2 becomes a page &nbsp;&nbsp;·&nbsp;&nbsp; Multiple <code># H1</code>s &rarr; each H1 becomes a page &nbsp;&nbsp;·&nbsp;&nbsp; <code>### H3</code>s always become sections within their page
+      </span>
+      <div class="actions-right">
+        <button class="btn btn-ghost" id="settings-btn" onclick="toggleSettings()">Settings</button>
+        <button class="btn btn-ghost" id="copy-prompt-btn" onclick="copyPrompt()">Copy prompt</button>
+        <button class="btn btn-ghost" onclick="loadExample()">Load example</button>
+        <button class="btn btn-primary" onclick="renderDoc()">Render →</button>
+      </div>
+    </div>
+    <div id="settings-panel" class="settings-panel" style="display:none">
+      <div class="settings-row">
+        <span class="settings-label">Tipografía</span>
+        <div class="font-opts">
+          <label><input type="radio" name="font-preset" value="editorial"> Editorial</label>
+          <label><input type="radio" name="font-preset" value="clean" checked> Clean</label>
+          <label><input type="radio" name="font-preset" value="classic"> Classic</label>
+          <label><input type="radio" name="font-preset" value="system"> System</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PREVIEW ==================== -->
+<div id="preview">
+  <iframe id="preview-frame"></iframe>
+</div>
+
+<!-- ==================== PROMPT TEMPLATE ====================
+     Stored here so copyPrompt() can read it without escaping issues.
+     Edit this text to update the prompt that gets copied to clipboard.
+-->
+<template id="prompt-tpl">Tomá el texto que te voy a pasar y reescribilo como una documentación larga, clara y navegable.
+
+## Objetivo
+
+Que el resultado mantenga la naturaleza de texto largo, pero más escaneable, más claro, más compacto y mejor editado. Sin componentes visuales especiales ni bloques custom. Solo markdown bien usado.
+
+## Qué tenés que hacer
+
+- Resumí y reorganizá el texto.
+- Conservá los conceptos, patrones, nombres y relaciones importantes.
+- Recortá redundancias, repeticiones y desarrollos innecesarios.
+- No resumas de más, pero tampoco lo hagas innecesariamente largo.
+- Ordená el contenido con una progresión lógica.
+- Agregá una introducción breve que funcione como resumen inicial dentro de la primera página.
+- Agregá una conclusión obligatoria que cierre y sintetice bien.
+- Agregá ejemplos naturales de la vida real cuando ayuden a entender conceptos abstractos o densos.
+
+## Regla de longitud
+
+- Priorizá una compresión editorial natural.
+- Recortá reformulaciones equivalentes, transiciones innecesarias y párrafos que repitan la misma idea.
+- Si una idea ya quedó clara, no la vuelvas a desarrollar sin aportar algo nuevo.
+- No desarrolles todas las secciones con la misma profundidad: expandí las ideas centrales y comprimí las secundarias.
+- Cuando dudes entre desarrollar más o comprimir mejor, priorizá comprimir sin perder conceptos clave.
+- Evitá extenderte solo por prolijidad estructural.
+- No agregues secciones, subsecciones o bloques extra si no mejoran claramente la comprensión.
+
+## Reglas de estilo
+
+- Escribí como documentación clara para leer, no como apuntes sueltos.
+- Priorizá claridad, fluidez y buena sintaxis.
+- Evitá tono excesivamente académico o rebuscado.
+- No agregues relleno.
+- El cuerpo principal debe seguir siendo prosa, pero no abuses de párrafos largos.
+
+## Títulos y navegación
+
+- Los títulos deben ser cortos, claros y escaneables (idealmente 3–6 palabras).
+- Evitá títulos excesivamente largos, abstractos o cargados.
+
+## Uso de markdown
+
+Usá markdown no solo para formatear, sino para mejorar la lectura.
+
+Priorizá:
+- **negritas** para conceptos clave
+- listas cuando ayuden a sintetizar, comparar o separar ideas
+- tablas cuando compriman mejor que un párrafo
+- blockquotes para frases o ideas importantes
+- ejemplos separados visualmente cuando aporten claridad
+
+Evitá:
+- bloques muy largos de texto corrido
+- usar listas por decorar
+- convertir todo en bullets
+- recursos de markdown que no reduzcan densidad ni mejoren comprensión
+
+## Reglas de balance
+
+- Mantené el formato de texto largo, pero con mejor respiración visual.
+- No dejes más de 2 o 3 párrafos seguidos sin un corte útil: subtítulo, lista, tabla, cita o ejemplo.
+- En secciones abstractas, incluí al menos un ejemplo concreto.
+- Si una comparación se entiende mejor en tabla, usá tabla. Si una idea se entiende mejor en lista, usá lista. Si una idea necesita desarrollo, usá prosa.
+- No sacrifiques compresión por estructura.
+
+## Estructura de salida
+
+Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice** — se genera automáticamente a partir de los H1.
+
+Jerarquía:
+- `# H1` → página (usá entre 3 y 6 en total, según la longitud del tema)
+- `## H2` → sección dentro de la página (aparece en el TOC lateral derecho)
+- `### H3` → subsección, solo si hay 2+ sub-temas claramente distintos
+
+Estructura obligatoria:
+- Primera página: `# [Título del documento]` — introducción y resumen inicial como secciones `## H2`
+- Páginas de contenido: una `# H1` por cada grupo temático principal
+- Última página: `# Conclusión`
+
+---
+
+El texto a reescribir es el siguiente:
+
+---
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script>
+'use strict';
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function slugify(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'page';
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ============================================================
+   SMART PAGE DETECTION
+   ============================================================ */
+function detectSplitLevel(md) {
+  var h1s = (md.match(/^# [^\n]+/gm) || []).length;
+  var h2s = (md.match(/^## [^\n]+/gm) || []).length;
+  if (h1s >= 2) return 'h1';
+  if (h2s >= 2) return 'h2';
+  return 'none';
+}
+
+function extractDocTitle(md) {
+  var h1 = md.match(/^# (.+)/m);
+  if (h1) return h1[1].trim();
+  var h2 = md.match(/^## (.+)/m);
+  if (h2) return h2[1].trim();
+  var firstLine = md.trim().split('\n')[0].replace(/^#+\s*/, '').trim();
+  return firstLine.slice(0, 80) || 'Document';
+}
+
+function parsePagesAtH1(md) {
+  var parts = md.split(/^(?=# )/m);
+  var pages = [];
+  var idxMap = {};
+
+  parts.forEach(function(part) {
+    var trimmed = part.trim();
+    if (!trimmed) return;
+    if (/^# /.test(trimmed)) {
+      var nl = trimmed.indexOf('\n');
+      var title = (nl === -1 ? trimmed.slice(2) : trimmed.slice(2, nl)).trim();
+      var content = nl === -1 ? '' : trimmed.slice(nl + 1).trim();
+      var base = slugify(title);
+      var slug = base;
+      var n = 1;
+      while (idxMap[slug]) { slug = base + '-' + (++n); }
+      idxMap[slug] = true;
+      pages.push({ title: title, slug: slug, content: content });
+    } else {
+      if (pages.length === 0) {
+        pages.push({ title: 'Introduction', slug: 'intro', content: trimmed });
+      }
+    }
+  });
+
+  return pages.length > 0 ? pages : [{ title: 'Document', slug: 'document', content: md }];
+}
+
+function parsePagesAtH2(md, docTitle) {
+  // Remove the first H1 line (it becomes docTitle, not a page)
+  var withoutH1 = md.replace(/^# [^\n]+\n?/m, '').trim();
+
+  // Separate any content before the first H2 (intro block after H1)
+  var firstH2Idx = withoutH1.search(/^## /m);
+  var introContent = firstH2Idx > 0 ? withoutH1.slice(0, firstH2Idx).trim() : '';
+  var mainContent = firstH2Idx >= 0 ? withoutH1.slice(firstH2Idx) : withoutH1;
+
+  var pages = [];
+  var idxMap = {};
+
+  // If there's content before first H2, create an intro page using docTitle
+  if (introContent) {
+    var introSlug = slugify(docTitle) || 'intro';
+    pages.push({ title: docTitle, slug: introSlug, content: introContent });
+    idxMap[introSlug] = true;
+  }
+
+  // Split at H2 boundaries — each H2 becomes a page
+  var parts = mainContent.split(/^(?=## )/m);
+  parts.forEach(function(part) {
+    var trimmed = part.trim();
+    if (!trimmed) return;
+    if (/^## /.test(trimmed)) {
+      var nl = trimmed.indexOf('\n');
+      var title = (nl === -1 ? trimmed.slice(3) : trimmed.slice(3, nl)).trim();
+      var content = nl === -1 ? '' : trimmed.slice(nl + 1).trim();
+      var base = slugify(title);
+      var slug = base;
+      var n = 1;
+      while (idxMap[slug]) { slug = base + '-' + (++n); }
+      idxMap[slug] = true;
+      pages.push({ title: title, slug: slug, content: content });
+    }
+  });
+
+  return pages.length > 0 ? pages : [{ title: docTitle, slug: slugify(docTitle) || 'document', content: md }];
+}
+
+function smartParsePages(md) {
+  var level = detectSplitLevel(md);
+  var docTitle = extractDocTitle(md);
+
+  if (level === 'h1') {
+    return { pages: parsePagesAtH1(md), docTitle: docTitle, splitLevel: 'h1' };
+  } else if (level === 'h2') {
+    var pages = parsePagesAtH2(md, docTitle);
+    return { pages: pages, docTitle: docTitle, splitLevel: 'h2' };
+  } else {
+    // Single page: strip the H1 line (its text becomes the title display via page-title)
+    var content = md.replace(/^# [^\n]+\n?/m, '').trim() || md;
+    var slug = slugify(docTitle);
+    return { pages: [{ title: docTitle, slug: slug || 'document', content: content }], docTitle: docTitle, splitLevel: 'none' };
+  }
+}
+
+/* ============================================================
+   BUILD DOC-SECTIONS FROM RENDERED HTML
+   sectionTag: 'H2' for h1-split mode, 'H3' for h2-split mode
+   ============================================================ */
+function buildSections(htmlStr, pageSlug, sectionTag) {
+  var tag = (sectionTag || 'H2').toUpperCase();
+  var tagLow = tag.toLowerCase();
+  var div = document.createElement('div');
+  div.innerHTML = htmlStr;
+
+  var sections = [];
+  var current = null;
+  var idx = 0;
+
+  Array.from(div.children).forEach(function(el) {
+    if (el.tagName === tag) {
+      if (current) sections.push(current);
+      var id = pageSlug + '-s' + (++idx);
+      current = {
+        id: id,
+        headingHTML: '<' + tagLow + ' id="' + id + '">' + el.innerHTML + '</' + tagLow + '>',
+        contentHTML: ''
+      };
+    } else {
+      if (!current) {
+        current = { id: pageSlug + '-s0', headingHTML: '', contentHTML: '' };
+      }
+      current.contentHTML += el.outerHTML;
+    }
+  });
+
+  if (current) sections.push(current);
+  return sections;
+}
+
+/* ============================================================
+   FONT LINKS for generated HTML HEAD
+   ============================================================ */
+function buildFontLinks(fontPreset) {
+  if (fontPreset === 'classic' || fontPreset === 'system') return [];
+  var preconn = [
+    '<link rel="preconnect" href="https://fonts.googleapis.com">',
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+  ];
+  if (fontPreset === 'clean') {
+    return preconn.concat(['<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">']);
+  }
+  // editorial (default)
+  return preconn.concat(['<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">']);
+}
+
+/* ============================================================
+   HTML GENERATION
+   ============================================================ */
+function buildHTML(pages, docTitle, splitLevel, fontPreset) {
+  /* ---- Left nav ---- */
+  var navHTML = pages.map(function(page, i) {
+    var cls = i === 0 ? 'nav-item active' : 'nav-item';
+    return '<a class="' + cls + '" data-page="' + page.slug + '">' + esc(page.title) + '</a>';
+  }).join('');
+
+  /* ---- Pages ---- */
+  var pagesHTML = pages.map(function(page, i) {
+    return buildPage(page, i, pages, splitLevel, docTitle);
+  }).join('\n');
+
+  /* ---- JS init ---- */
+  var firstSlug = pages[0].slug;
+  var sectionTag = splitLevel === 'h2' ? 'h3' : 'h2';
+
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>' + esc(docTitle) + ' \u2014 Cognitiva.</title>',
+  ].concat(buildFontLinks(fontPreset)).concat([
+    '<style>' + templateCSS(fontPreset) + '</style>',
+    '</head>',
+    '<body>',
+    '',
+    '<button class="sidebar-reopen" id="sidebar-reopen" onclick="toggleSidebar()">',
+    '  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg>',
+    '</button>',
+    '',
+    '<div class="layout">',
+    '',
+    '<!-- LEFT SIDEBAR -->',
+    '<aside class="sidebar-left" id="sidebar-left"><div class="sidebar-inner">',
+    '  <div class="brand">',
+    '    <span class="brand-name">Cognitiva<span class="brand-dot">.</span></span>',
+    '    <button class="sidebar-toggle" onclick="toggleSidebar()">',
+    '      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="10,3 5,8 10,13"/></svg>',
+    '    </button>',
+    '  </div>',
+    '  <div class="doc-identity">',
+    '    <div class="doc-identity-title">' + esc(docTitle) + '</div>',
+    '  </div>',
+    '  <nav class="sidebar-nav"><div class="nav-section">' + navHTML + '</div></nav>',
+    '  <button class="back-to-editor" onclick="window.parent.postMessage(\'back\',\'*\')">← Editor</button>',
+    '</div></aside>',
+    '',
+    '<!-- MAIN -->',
+    '<main class="main" id="main"><div class="main-inner">',
+    pagesHTML,
+    '</div></main>',
+    '',
+    '<!-- RIGHT SIDEBAR -->',
+    '<div class="sidebar-right-col">',
+    '  <aside class="sidebar-right">',
+    '    <div class="otp-label">On this page</div>',
+    '    <nav id="on-this-page"></nav>',
+    '  </aside>',
+    '</div>',
+    '',
+    '</div><!-- /layout -->',
+    '',
+    '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"><\/script>',
+    '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"><\/script>',
+    '<script>',
+    templateJS(firstSlug, sectionTag),
+    '<\/script>',
+    '</body>',
+    '</html>'
+  ]).join('\n');
+}
+
+function buildPage(page, i, pages, splitLevel, docTitle) {
+  var isFirst = i === 0;
+  var activeClass = isFirst ? ' active' : '';
+
+  /* Eyebrow — first page always uses docTitle */
+  var eyebrow = isFirst
+    ? 'Cognitiva. \u00B7 ' + esc(docTitle)
+    : (i < 10 ? '0' + i : '' + i) + ' \u2014 ' + esc(page.title);
+
+  /* Parse markdown */
+  var rawHTML = marked.parse(page.content || '');
+  rawHTML = rawHTML
+    .replace(/<table>/g, '<div class="table-wrap"><table>')
+    .replace(/<\/table>/g, '</table></div>');
+
+  /* Split into doc-sections at H2 (h1-split) or H3 (h2-split) */
+  var sectionTag = splitLevel === 'h2' ? 'H3' : 'H2';
+  var sections = buildSections(rawHTML, page.slug, sectionTag);
+  var sectionsHTML = sections.length === 0
+    ? '<div class="doc-section"><div class="prose"><p><em>No content.</em></p></div></div>'
+    : sections.map(function(s) {
+        return '<div class="doc-section">\n' +
+          s.headingHTML + '\n' +
+          '<div class="prose">' + s.contentHTML + '</div>\n' +
+          '</div>';
+      }).join('\n');
+
+  /* Prev/Next */
+  var prev = i > 0
+    ? '<button class="page-nav-btn" onclick="switchPage(\'' + pages[i-1].slug + '\')">' +
+      '<span class="page-nav-dir">\u2190 Previous</span>' +
+      '<span class="page-nav-label">' + esc(pages[i-1].title) + '</span></button>'
+    : '<div style="flex:1"></div>';
+
+  var next = i < pages.length - 1
+    ? '<button class="page-nav-btn next" onclick="switchPage(\'' + pages[i+1].slug + '\')">' +
+      '<span class="page-nav-dir">Next \u2192</span>' +
+      '<span class="page-nav-label">' + esc(pages[i+1].title) + '</span></button>'
+    : '<div style="flex:1"></div>';
+
+  return [
+    '<div class="page' + activeClass + '" id="page-' + page.slug + '">',
+    '<header class="page-header">',
+    '  <div class="page-eyebrow">' + eyebrow + '</div>',
+    '  <h1 class="page-title">' + esc(page.title) + '</h1>',
+    '</header>',
+    sectionsHTML,
+    '<div class="page-nav">' + prev + next + '</div>',
+    '</div>'
+  ].join('\n');
+}
+
+/* ============================================================
+   TEMPLATE CSS — full docs-markdown design system
+   ============================================================ */
+function templateCSS(fontPreset) {
+  var presets = {
+    editorial: { d:"'Fraunces',Georgia,serif",            b:"'Inter',system-ui,sans-serif",         m:"'JetBrains Mono','SF Mono',Consolas,monospace" },
+    clean:     { d:"'Inter',system-ui,sans-serif",         b:"'Inter',system-ui,sans-serif",         m:"'JetBrains Mono','SF Mono',Consolas,monospace" },
+    classic:   { d:"Georgia,'Times New Roman',serif",      b:"system-ui,-apple-system,sans-serif",   m:"Menlo,Monaco,Consolas,monospace" },
+    system:    { d:"system-ui,-apple-system,sans-serif",   b:"system-ui,-apple-system,sans-serif",   m:"ui-monospace,Menlo,Monaco,Consolas,monospace" }
+  };
+  var fp = presets[fontPreset] || presets.clean;
+
+  return ':root{' +
+    '--font-display:' + fp.d + ';' +
+    '--font-body:' + fp.b + ';' +
+    '--font-mono:' + fp.m + ';' +
+    '--color-paper:oklch(0.985 0.005 80);' +
+    '--color-surface:oklch(1 0 0);' +
+    '--color-surface2:oklch(0.97 0.008 80);' +
+    '--color-rule:oklch(0.87 0.01 60);' +
+    '--color-border:rgba(0,0,0,0.07);' +
+    '--color-border-hi:rgba(0,0,0,0.13);' +
+    '--color-ink:oklch(0.18 0.01 60);' +
+    '--color-muted:oklch(0.50 0.01 60);' +
+    '--color-faint:oklch(0.72 0.01 60);' +
+    '--color-accent:oklch(0.55 0.18 28);' +
+    '--color-accent-soft:oklch(0.95 0.035 30);' +
+    '--sidebar-w:260px}' +
+  '@media(prefers-color-scheme:dark){:root{' +
+    '--color-paper:oklch(0.16 0.01 60);' +
+    '--color-surface:oklch(0.19 0.012 60);' +
+    '--color-surface2:oklch(0.22 0.012 60);' +
+    '--color-rule:oklch(0.27 0.01 60);' +
+    '--color-border:rgba(255,255,255,0.08);' +
+    '--color-border-hi:rgba(255,255,255,0.15);' +
+    '--color-ink:oklch(0.91 0.005 60);' +
+    '--color-muted:oklch(0.65 0.008 60);' +
+    '--color-faint:oklch(0.42 0.008 60);' +
+    '--color-accent:oklch(0.72 0.14 28);' +
+    '--color-accent-soft:oklch(0.25 0.06 28)}}' +
+  '*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}' +
+  'html,body{height:100%}' +
+  'body{background:var(--color-paper);color:var(--color-ink);font-family:var(--font-body);font-size:14.5px;line-height:1.7}' +
+  // Layout
+  '.layout{display:flex;align-items:stretch;min-height:100vh;max-width:1440px;margin:0 auto;position:relative}' +
+  // Left sidebar
+  '.sidebar-left{flex-shrink:0;width:var(--sidebar-w);overflow:clip}' +
+  '.sidebar-left.is-closing{transition:width 0.2s cubic-bezier(0.4,0,1,1)}' +
+  '.sidebar-left.is-opening{transition:width 0.42s cubic-bezier(0.34,1.4,0.64,1)}' +
+  '.sidebar-left.closed{width:0}' +
+  '.main{border-left:1px solid var(--color-rule);transition:border-left-color 0.2s ease}' +
+  '.sidebar-left.closed~.main{border-left-color:transparent}' +
+  '.sidebar-inner{width:var(--sidebar-w);position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;background:var(--color-paper)}' +
+  '.sidebar-inner::-webkit-scrollbar{display:none}' +
+  '.brand{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 14px;border-bottom:1px solid var(--color-border);white-space:nowrap}' +
+  '.brand-name{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--color-ink);letter-spacing:-0.4px}' +
+  '.brand-dot{color:#dc2626}' +
+  '.sidebar-toggle{flex-shrink:0;width:26px;height:26px;border:1px solid var(--color-border);background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-faint);transition:background 0.13s,color 0.13s,border-color 0.13s}' +
+  '.sidebar-toggle:hover{background:var(--color-surface2);color:var(--color-muted);border-color:var(--color-border-hi)}' +
+  '.sidebar-toggle svg{width:12px;height:12px;flex-shrink:0}' +
+  '.doc-identity{padding:16px 16px 0}' +
+  '.doc-identity-title{font-size:13px;font-weight:600;color:var(--color-ink);line-height:1.35;margin-bottom:5px}' +
+  '.sidebar-nav{padding:18px 10px 0}' +
+  '.nav-section{margin-bottom:18px}' +
+  '.nav-item{display:block;font-size:12.5px;font-weight:400;color:var(--color-muted);text-decoration:none;padding:5px 10px;border-radius:7px;cursor:pointer;transition:color 0.13s,background 0.13s;margin-bottom:1px;line-height:1.35;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+  '.nav-item:hover{color:var(--color-ink);background:var(--color-surface2)}' +
+  '.nav-item.active{color:var(--color-accent);background:var(--color-accent-soft);font-weight:500}' +
+  // Back-to-editor button
+  '.back-to-editor{margin:auto 16px 16px;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:calc(100% - 32px)}' +
+  '.back-to-editor:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
+  // Reopen
+  '.sidebar-reopen{position:fixed;top:18px;left:12px;z-index:400;width:28px;height:28px;border:1px solid var(--color-rule);background:var(--color-paper);border-radius:7px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--color-muted);box-shadow:0 1px 6px rgba(0,0,0,0.08);transition:background 0.13s}' +
+  '.sidebar-reopen:hover{background:var(--color-surface2)}' +
+  '.sidebar-reopen svg{width:12px;height:12px}' +
+  // Main
+  '.main{flex:1;min-width:0;padding:44px 52px 80px}' +
+  '.main-inner{max-width:720px;margin:0 auto}' +
+  '.page{display:none}' +
+  '.page.active{display:block;animation:fadeUp 0.3s ease-out both}' +
+  '@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}' +
+  '@media(prefers-reduced-motion:reduce){.page.active{animation:none}}' +
+  '.page-header{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--color-border)}' +
+  '.page-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);margin-bottom:12px}' +
+  '.page-title{font-family:var(--font-display);font-size:clamp(24px,4vw,38px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:8px;text-wrap:balance;color:var(--color-ink)}' +
+  '.doc-section{margin-bottom:52px;scroll-margin-top:20px}' +
+  '.doc-section>h2,.doc-section>h3{font-family:var(--font-display);font-size:clamp(17px,2.5vw,22px);font-weight:600;letter-spacing:-0.4px;color:var(--color-ink);margin-bottom:18px;line-height:1.25;text-wrap:balance}' +
+  // Prev/next
+  '.page-nav{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--color-border)}' +
+  '.page-nav-btn{flex:1;display:flex;flex-direction:column;gap:3px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:9px;padding:12px 16px;cursor:pointer;transition:border-color 0.14s,background 0.14s;text-align:left;min-width:0;font:inherit}' +
+  '.page-nav-btn.next{text-align:right}' +
+  '.page-nav-btn:hover{border-color:var(--color-border-hi);background:var(--color-surface2)}' +
+  '.page-nav-dir{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)}' +
+  '.page-nav-label{font-size:13px;font-weight:500;color:var(--color-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+  // Prose
+  '.prose{min-width:0}' +
+  '.prose>*+*{margin-top:18px}' +
+  '.prose p{font-size:14.5px;color:var(--color-muted);line-height:1.78;overflow-wrap:break-word}' +
+  '.prose strong{color:var(--color-ink);font-weight:600}' +
+  '.prose em{font-style:italic}' +
+  '.prose h3{font-size:14px;font-weight:600;color:var(--color-ink);margin-top:24px;margin-bottom:8px;letter-spacing:-0.1px}' +
+  '.prose h4{font-size:13px;font-weight:600;color:var(--color-muted);margin-top:18px;margin-bottom:6px}' +
+  '.prose ul,.prose ol{padding-left:20px;color:var(--color-muted);font-size:14.5px;line-height:1.7}' +
+  '.prose ul{list-style:disc}' +
+  '.prose ol{list-style:decimal}' +
+  '.prose li{margin-bottom:5px;overflow-wrap:break-word}' +
+  '.prose li:last-child{margin-bottom:0}' +
+  '.prose li>ul,.prose li>ol{margin-top:5px}' +
+  '.prose blockquote{border-left:3px solid var(--color-accent);background:var(--color-accent-soft);border-radius:0 8px 8px 0;padding:13px 18px;font-family:var(--font-display);font-size:15px;font-style:italic;color:var(--color-muted);line-height:1.7;overflow-wrap:break-word}' +
+  '.prose blockquote p{font-size:15px;font-family:var(--font-display);font-style:italic;color:var(--color-muted);margin:0}' +
+  '.prose .table-wrap{overflow-x:auto;background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px;scrollbar-width:thin}' +
+  '.prose table{width:100%;border-collapse:collapse;font-size:13px}' +
+  '.prose thead th{background:var(--color-surface2);padding:9px 14px;text-align:left;font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-muted);border-bottom:1px solid var(--color-border);white-space:nowrap}' +
+  '.prose tbody tr{border-bottom:1px solid var(--color-border);transition:background 0.1s}' +
+  '.prose tbody tr:last-child{border-bottom:none}' +
+  '.prose tbody tr:hover{background:var(--color-surface2)}' +
+  '.prose td{padding:9px 14px;color:var(--color-muted);vertical-align:top;min-width:0;overflow-wrap:break-word;line-height:1.55}' +
+  '.prose td:first-child{color:var(--color-ink);font-weight:500}' +
+  '.prose pre{background:var(--color-surface2);border:1px solid var(--color-border);border-radius:9px;font-family:var(--font-mono);font-size:12px;line-height:1.7;padding:14px 16px;overflow-x:auto}' +
+  '.prose pre code{font-family:var(--font-mono);font-size:inherit;background:none;border:none;padding:0;color:var(--color-ink)}' +
+  '.prose code{font-family:var(--font-mono);font-size:11.5px;background:var(--color-surface2);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;color:var(--color-ink)}' +
+  '.prose hr{border:none;border-top:1px solid var(--color-border)}' +
+  '.prose a{color:var(--color-accent);text-decoration:none}' +
+  '.prose a:hover{text-decoration:underline}' +
+  '.prose img{max-width:100%;border-radius:8px;border:1px solid var(--color-border);display:block}' +
+  // Right sidebar
+  '.sidebar-right-col{flex-shrink:0;width:200px}' +
+  '.sidebar-right{position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:none;padding:48px 16px 32px 12px}' +
+  '.sidebar-right::-webkit-scrollbar{display:none}' +
+  '.otp-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-faint);margin-bottom:10px}' +
+  '#on-this-page{position:relative;border-left:1px solid var(--color-rule)}' +
+  '.otp-indicator{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:var(--color-accent);pointer-events:none;' +
+    'clip-path:polygon(0 var(--otp-top,0px),100% var(--otp-top,0px),100% calc(var(--otp-top,0px) + var(--otp-height,0px)),0 calc(var(--otp-top,0px) + var(--otp-height,0px)));' +
+    'transition:clip-path 200ms cubic-bezier(0.4,0,0.2,1)}' +
+  '.otp-link{display:block;font-size:12px;color:var(--color-muted);text-decoration:none;padding:3.5px 8px 3.5px 12px;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color 0.12s}' +
+  '.otp-link:hover{color:var(--color-ink)}' +
+  '.otp-link.active{color:var(--color-accent);font-weight:500}' +
+  // Responsive
+  '@media(max-width:1000px){' +
+    '.layout{flex-direction:column}' +
+    '.sidebar-left{width:100%!important;height:auto;position:relative;border-bottom:1px solid var(--color-rule);transition:none}' +
+    '.sidebar-left.closed{width:100%!important}' +
+    '.sidebar-inner{width:100%;position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:nowrap;padding:10px 14px;overflow-x:auto;overflow-y:visible}' +
+    '.brand{padding:0;border-bottom:none;flex-shrink:0;margin-right:12px}' +
+    '.sidebar-toggle,.sidebar-reopen{display:none!important}' +
+    '.doc-identity{padding:0;display:none}' +
+    '.sidebar-nav{padding:0;display:flex;gap:2px;flex-shrink:0}' +
+    '.nav-item{flex-shrink:0;font-size:12px;padding:5px 9px}' +
+    '.sidebar-right-col{display:none}' +
+    '.main{padding:24px 20px 60px}' +
+    '.back-to-editor{display:none}' +
+  '}';
+}
+
+/* ============================================================
+   TEMPLATE JS — page switching, TOC, sidebar toggle
+   sectionTag: 'h2' (h1-split) or 'h3' (h2-split)
+   ============================================================ */
+function templateJS(firstSlug, sectionTag) {
+  sectionTag = sectionTag || 'h2';
+  return (
+    'var pages={};\n' +
+    'document.querySelectorAll(".page").forEach(function(p){pages[p.id.replace("page-","")]=p;});\n' +
+
+    'function switchPage(id){\n' +
+    '  Object.values(pages).forEach(function(p){p.classList.remove("active");});\n' +
+    '  document.querySelectorAll(".nav-item").forEach(function(a){a.classList.remove("active");});\n' +
+    '  var page=pages[id];if(!page)return;\n' +
+    '  page.classList.add("active");\n' +
+    '  var nav=document.querySelector(\'[data-page="\'+id+\'"]\');\n' +
+    '  if(nav)nav.classList.add("active");\n' +
+    '  window.scrollTo({top:0,behavior:"instant"});\n' +
+    '  buildTOC(id);\n' +
+    '}\n' +
+
+    'var tocObs=null;\n' +
+    'function buildTOC(pid){\n' +
+    '  var page=pages[pid],toc=document.getElementById("on-this-page");\n' +
+    '  toc.innerHTML="";\n' +
+    '  if(!page)return;\n' +
+    '  var ind=document.createElement("div");ind.className="otp-indicator";toc.appendChild(ind);\n' +
+    '  var hs=Array.from(page.querySelectorAll("' + sectionTag + '[id]"));\n' +
+    '  hs.forEach(function(h){\n' +
+    '    var a=document.createElement("a");a.href="#"+h.id;a.className="otp-link";\n' +
+    '    a.textContent=h.textContent;\n' +
+    '    a.addEventListener("click",function(e){e.preventDefault();h.scrollIntoView({behavior:"smooth",block:"start"});});\n' +
+    '    toc.appendChild(a);\n' +
+    '  });\n' +
+    '  if(tocObs){tocObs.disconnect();tocObs=null;}\n' +
+    '  if(!hs.length)return;\n' +
+    '  var links=Array.from(toc.querySelectorAll(".otp-link")),vis=new Set();\n' +
+    '  function mi(al){\n' +
+    '    if(!al.length){ind.style.setProperty("--otp-height","0px");return;}\n' +
+    '    var f=al[0],l=al[al.length-1];\n' +
+    '    var t=f.offsetTop+parseFloat(getComputedStyle(f).paddingTop);\n' +
+    '    var b=l.offsetTop+l.clientHeight-parseFloat(getComputedStyle(l).paddingBottom);\n' +
+    '    ind.style.setProperty("--otp-top",t+"px");ind.style.setProperty("--otp-height",(b-t)+"px");\n' +
+    '  }\n' +
+    '  function ap(){\n' +
+    '    var al;\n' +
+    '    if(vis.size>0){\n' +
+    '      links.forEach(function(l){l.classList.toggle("active",vis.has(l.getAttribute("href").slice(1)));});\n' +
+    '      al=links.filter(function(l){return l.classList.contains("active");});\n' +
+    '    }else{\n' +
+    '      var passed=hs.filter(function(h){return h.getBoundingClientRect().top<=0;});\n' +
+    '      var tgt=passed.length?passed[passed.length-1]:hs[0];\n' +
+    '      links.forEach(function(l){l.classList.remove("active");});\n' +
+    '      var m=links.find(function(l){return l.getAttribute("href")==="#"+tgt.id;});\n' +
+    '      if(m)m.classList.add("active");al=m?[m]:[];\n' +
+    '    }\n' +
+    '    mi(al);\n' +
+    '  }\n' +
+    '  tocObs=new IntersectionObserver(function(en){\n' +
+    '    en.forEach(function(e){if(e.isIntersecting)vis.add(e.target.id);else vis.delete(e.target.id);});\n' +
+    '    ap();\n' +
+    '  },{rootMargin:"0px 0px 0px 0px",threshold:0});\n' +
+    '  hs.forEach(function(h){tocObs.observe(h);});ap();\n' +
+    '}\n' +
+
+    'document.querySelectorAll(".nav-item").forEach(function(a){\n' +
+    '  a.addEventListener("click",function(e){e.preventDefault();switchPage(this.dataset.page);});\n' +
+    '});\n' +
+
+    'function toggleSidebar(){\n' +
+    '  var s=document.getElementById("sidebar-left"),r=document.getElementById("sidebar-reopen");\n' +
+    '  var open=!s.classList.contains("closed");\n' +
+    '  if(open){s.classList.remove("is-opening");s.classList.add("is-closing","closed");r.style.display="flex";}\n' +
+    '  else{s.classList.remove("is-closing");s.classList.add("is-opening");s.classList.remove("closed");r.style.display="none";}\n' +
+    '}\n' +
+
+    'document.getElementById("sidebar-reopen").style.display="none";\n' +
+    'buildTOC("' + firstSlug + '");\n'
+  );
+}
+
+/* ============================================================
+   APP ACTIONS
+   ============================================================ */
+var _html = '';
+
+function toggleSettings() {
+  var panel = document.getElementById('settings-panel');
+  var btn = document.getElementById('settings-btn');
+  var isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.style.color = isOpen ? '' : 'var(--ink)';
+}
+
+function renderDoc() {
+  var md = document.getElementById('md-input').value.trim();
+  if (!md) { alert('Paste some markdown first.'); return; }
+
+  var result = smartParsePages(md);
+  var checked = document.querySelector('[name="font-preset"]:checked');
+  var fontPreset = checked ? checked.value : 'clean';
+  _html = buildHTML(result.pages, result.docTitle, result.splitLevel, fontPreset);
+
+  var frame = document.getElementById('preview-frame');
+  frame.srcdoc = _html;
+
+  document.getElementById('editor').style.display = 'none';
+  document.getElementById('preview').style.display = 'flex';
+}
+
+function backToEditor() {
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('editor').style.display = 'flex';
+}
+
+window.addEventListener('message', function(e) {
+  if (e.data === 'back') backToEditor();
+});
+
+/* ============================================================
+   COPY PROMPT
+   ============================================================ */
+function copyPrompt() {
+  var text = document.getElementById('prompt-tpl').innerHTML
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
+  var btn = document.getElementById('copy-prompt-btn');
+
+  function done() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    setTimeout(function() { btn.textContent = orig; }, 2000);
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta); done();
+  }
+}
+
+// Keyboard shortcut: Cmd+Enter to render
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    if (document.getElementById('editor').style.display !== 'none') renderDoc();
+  }
+});
+
+/* ============================================================
+   EXAMPLE CONTENT
+   ============================================================ */
+function loadExample() {
+  document.getElementById('md-input').value =
+'# The Attention Economy\n' +
+'\n' +
+'## What It Is\n' +
+'\n' +
+'The **attention economy** treats human attention as a scarce resource to be harvested and sold. Platforms compete for time-on-screen, not for value delivered to the user.\n' +
+'\n' +
+'> Attention is the new oil. The companies that extract it most efficiently win — regardless of what they produce with it.\n' +
+'\n' +
+'### The scarcity logic\n' +
+'\n' +
+'Attention is finite. Every minute someone spends on one platform is a minute they are not spending on another. This creates a zero-sum competition — not for quality, but for time.\n' +
+'\n' +
+'The business model is simple: capture attention, sell it to advertisers. The incentive is not to create value for users, but to maximize the amount of attention available to sell.\n' +
+'\n' +
+'### Platform incentives\n' +
+'\n' +
+'A platform whose revenue depends on time-on-screen has structural incentives to maximize that time, independent of whether that time is good for the user.\n' +
+'\n' +
+'This is not a conspiracy — it is a consequence of the business model. When engagement is the metric, engagement-maximizing design follows naturally.\n' +
+'\n' +
+'## How It Works\n' +
+'\n' +
+'Platforms use a small set of psychological mechanisms to capture and sustain attention. These mechanisms are not accidental — they are deliberately designed and continuously optimized.\n' +
+'\n' +
+'### Variable rewards\n' +
+'\n' +
+'The most powerful mechanism is the **variable reward schedule** — the same principle that makes slot machines addictive. When rewards are unpredictable, the behavior that seeks them becomes compulsive.\n' +
+'\n' +
+'In a feed, the "reward" is a piece of content that is interesting, funny, or emotionally resonant. Because you cannot predict which scroll will deliver it, you keep scrolling. The ratio of interesting to uninteresting content is carefully tuned — too high and the behavior extinguishes; too low and users leave.\n' +
+'\n' +
+'### Social validation loops\n' +
+'\n' +
+'Likes, follower counts, and view metrics create a **status feedback loop**. Posting content triggers an anxious wait for validation. The notification that arrives is the reward.\n' +
+'\n' +
+'This loop is particularly effective because it ties platform engagement to social identity. Leaving the platform means losing access to the status signals you have accumulated.\n' +
+'\n' +
+'### Infinite scroll\n' +
+'\n' +
+'Before infinite scroll, pagination created natural stopping points. Reaching the end of a page was a moment of decision: do I continue?\n' +
+'\n' +
+'Infinite scroll eliminates those moments. The content never ends, so the question "should I stop?" never arises naturally. The user must impose their own stopping point — against a system specifically designed to prevent them from finding one.\n' +
+'\n' +
+'## The Real Cost\n' +
+'\n' +
+'The effects of sustained attention-harvesting design are measurable across multiple dimensions.\n' +
+'\n' +
+'### Cognitive effects\n' +
+'\n' +
+'| Effect | Evidence |\n' +
+'|--------|----------|\n' +
+'| Reduced attention span | Average focus time dropped from 12s (2000) to 8s (2015) |\n' +
+'| Weakened deep reading | Sustained reading comprehension declines with habitual scanning |\n' +
+'| Impaired memory encoding | Constant interruption prevents consolidation of long-term memories |\n' +
+'| Increased task-switching cost | Frequent context shifts reduce efficiency on focused work |\n' +
+'\n' +
+'The mechanism is well understood: **deep work requires sustained attention**. A cognitive environment optimized for interruption is one that makes deep work structurally harder.\n' +
+'\n' +
+'### Mental health effects\n' +
+'\n' +
+'41% of heavy social media users report feeling worse after use — not better. The correlation between heavy platform use and anxiety, depression, and loneliness is consistent across studies, though causality is debated.\n' +
+'\n' +
+'The more useful frame is not "does social media cause depression?" but "does this design pattern serve its users?" On that question, the evidence is fairly clear.\n' +
+'\n' +
+'## Design Principles\n' +
+'\n' +
+'Building software that respects attention requires deliberate choices at every level of the product. These principles are not idealistic — they are practical responses to the mechanisms described above.\n' +
+'\n' +
+'### Finite feeds\n' +
+'\n' +
+'Replace infinite scroll with paginated, bounded content. A feed that ends gives users a natural decision point and a sense of completion.\n' +
+'\n' +
+'**Example —** The Kindle app shows reading progress as a percentage and a time-remaining estimate. This small change transforms a potentially endless activity into one with a visible finish line — which makes users *more* likely to return, not less.\n' +
+'\n' +
+'### No unread counts\n' +
+'\n' +
+'Remove notification badges. Unread counts create **ambient anxiety** — a low-level pressure to clear the number that persists even when the underlying content has no real value.\n' +
+'\n' +
+'```js\n' +
+'// Instead of a count that creates urgency:\n' +
+'badge.count = unreadMessages.length\n' +
+'\n' +
+'// A neutral signal that respects the user:\n' +
+'badge.hasNew = lastActivity > lastVisit\n' +
+'```\n' +
+'\n' +
+'The second version conveys the same information — there is something new — without the compulsive pressure of a number that demands to be zeroed.\n' +
+'\n' +
+'### Explicit time signals\n' +
+'\n' +
+'Show users how long they have been in a session. Not as a dark pattern designed to trigger guilt, but as a neutral, accurate signal that lets them make an informed decision.\n' +
+'\n' +
+'The resistance to this principle is usually "it will reduce time-on-site." That is true. It will also increase user trust and long-term retention — the metrics that matter for products that are not trying to extract maximum short-term value.\n' +
+'\n' +
+'### Calm notifications\n' +
+'\n' +
+'Notifications should be sent when they create value for the user, not when they create an opportunity for re-engagement for the platform.\n' +
+'\n' +
+'A practical rule: before sending a notification, ask whether the user would thank you for it if they knew exactly why you sent it.\n' +
+'\n' +
+'## Conclusion\n' +
+'\n' +
+'The attention economy is not a natural force. It is an architectural choice — one that was made, and can be unmade.\n' +
+'\n' +
+'The platforms that outlast the current cycle will be the ones users trust, because they chose metrics that align with user value rather than engagement time. **Finite design** beats infinite scroll in long-term retention. **Calm notifications** reduce anxiety without reducing utility.\n' +
+'\n' +
+'The right question is not "how long did they stay?" but "did they leave better off?"';
+}
+</script>
+</body>
+</html>
