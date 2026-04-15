@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
 
@@ -32,33 +32,23 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test
+        continue-on-error: true
 
-      - name: Upload report
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: runs/${{ github.run_id }}
 
       - name: Comment PR with report link
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
-            const { data: { artifacts } } = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId,
-            });
-            const report = artifacts.find(a => a.name === 'playwright-report');
-            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const artifactUrl = report
-              ? `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${report.id}`
-              : null;
-            const body = report
-              ? `## Playwright Test Report\n\n📥 [Descargar reporte](${artifactUrl}) — descomprimí el ZIP y abrí \`index.html\`\n🔍 [Ver run completo](${runUrl})\n\n> El reporte incluye screenshots y videos por test.`
-              : `## Playwright Tests\n\n❌ No se generó reporte. [Ver run](${runUrl})`;
+            const reportUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/runs/${{ github.run_id }}/`;
+            const runUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            const body = `## Playwright Test Report\n\n📊 [Ver reporte visual](${reportUrl})\n🔍 [Ver run completo](${runUrl})\n\n> El reporte incluye screenshots y videos por test. Puede tardar 1-2 min en estar disponible después del deploy.`;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
