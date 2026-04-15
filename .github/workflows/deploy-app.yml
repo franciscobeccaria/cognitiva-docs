@@ -1,0 +1,29 @@
+name: Deploy App to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare app files
+        run: |
+          mkdir _deploy
+          cp index.html renderer.html template.html README.md _deploy/
+          cp -r docs _deploy/docs
+
+      - name: Deploy app to GitHub Pages root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_deploy
+          keep_files: true
