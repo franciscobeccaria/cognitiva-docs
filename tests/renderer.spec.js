@@ -169,6 +169,19 @@ test.describe('Editor UI', () => {
     await snap(page, testInfo, 'font-presets');
   });
 
+  test('color preset radios are present', async ({ page }, testInfo) => {
+    await page.click('#settings-btn');
+    const panel = page.locator('#settings-panel');
+    await expect(panel.locator('[name="color-preset"][value="notion"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="linear"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="apple"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="github"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="stripe"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="figma"]')).toHaveCount(1);
+    await expect(panel.locator('[name="color-preset"][value="notion"]')).toBeChecked();
+    await snap(page, testInfo, 'color-presets');
+  });
+
   test('Cmd+Enter triggers render', async ({ page }, testInfo) => {
     await page.fill('#md-input', MD_SHORT);
     await snap(page, testInfo, 'before-render');
@@ -384,6 +397,38 @@ test.describe('Typography Presets', () => {
     const googleFontsLink = frame.locator('link[href*="fonts.googleapis.com"]');
     await expect(googleFontsLink).toHaveCount(0);
     await snap(page, testInfo, 'preset-system-rendered');
+  });
+});
+
+/* ============================================================
+   COLOR PRESETS
+   ============================================================ */
+test.describe('Color Presets', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/renderer.html');
+  });
+
+  test('linear preset changes the generated accent token', async ({ page }, testInfo) => {
+    await page.click('#settings-btn');
+    await page.click('[name="color-preset"][value="linear"]');
+    await snap(page, testInfo, 'color-linear-selected');
+    const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
+    const accent = await frame.locator('body').evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim()
+    );
+    expect(accent).toBe('oklch(0.56 0.18 285)');
+    await snap(page, testInfo, 'color-linear-rendered');
+  });
+
+  test('apple preset changes the generated accent token', async ({ page }, testInfo) => {
+    await page.click('#settings-btn');
+    await page.click('[name="color-preset"][value="apple"]');
+    const frame = await renderMarkdown(page, MD_SHORT);
+    const accent = await frame.locator('body').evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim()
+    );
+    expect(accent).toBe('oklch(0.58 0.20 255)');
+    await snap(page, testInfo, 'color-apple-rendered');
   });
 });
 
