@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognitiva. — Markdown docs toolkit</title>
+<title>Cognitiva. — Markdown docs reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -207,8 +207,8 @@ footer a:hover{color:var(--muted)}
 
   <header>
     <div class="brand">Cognitiva<span class="dot">.</span></div>
-    <h1>Markdown<br>docs toolkit</h1>
-    <p class="lead">Paste any long-form text, transform it into structured documentation, and render it as a navigable 3-column layout — no build tools, no dependencies.</p>
+    <h1>Markdown<br>docs reader</h1>
+    <p class="lead">Paste existing markdown and read it as a clean, navigable 3-column documentation page — no build tools, no account, no generation required.</p>
   </header>
 
   <!-- Tools -->
@@ -218,7 +218,7 @@ footer a:hover{color:var(--muted)}
     <a class="tool-card" href="renderer.html">
       <div class="tool-tag">App</div>
       <div class="tool-name">Markdown Renderer</div>
-      <p class="tool-desc">Paste markdown, get a paginated 3-column doc site. Each <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> becomes a sidebar page. Includes a prompt you can copy to generate the right markdown from any LLM.</p>
+      <p class="tool-desc">Paste markdown, get a paginated 3-column doc site. Each <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> becomes a sidebar page. Includes an optional prompt if you want help preparing source text elsewhere.</p>
       <span class="tool-cta">
         Open renderer
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
@@ -243,28 +243,28 @@ footer a:hover{color:var(--muted)}
     <div class="step">
       <span class="step-num">01</span>
       <div class="step-body">
-        <h3>Copy the prompt</h3>
-        <p>Click <strong>Copy prompt</strong> in the renderer. It gives you an editorial prompt that tells an LLM how to rewrite your source text as structured markdown with the right heading hierarchy.</p>
+        <h3>Paste markdown</h3>
+        <p>Start with markdown you already have: notes, guides, documentation, study material, research summaries, or an LLM output from any chat.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">02</span>
       <div class="step-body">
-        <h3>Generate the markdown</h3>
-        <p>Paste the prompt + your text into any LLM (Claude, GPT, etc.). The output uses <code># H1</code> as page separators and <code>## H2</code> as sections — no manual index.</p>
+        <h3>Render the reader</h3>
+        <p>Click <strong>Render →</strong>. Cognitiva turns headings into navigation: <code># H1</code> pages, <code>## H2</code> sections, and a right-side table of contents.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">03</span>
       <div class="step-body">
-        <h3>Paste and render</h3>
-        <p>Drop the markdown into the renderer, click <strong>Render →</strong>. You get a full 3-column doc with a navigable sidebar, right TOC, prev/next pagination, and dark mode.</p>
+        <h3>Use the prompt only if needed</h3>
+        <p>If your source is messy or too long, copy the optional prompt and use it in your preferred chat app to get cleaner markdown for the renderer.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">04</span>
       <div class="step-body">
-        <h3>Download the HTML</h3>
+        <h3>Share the HTML</h3>
         <p>The rendered result is a self-contained <code>.html</code> file — no server needed. Share it, open it offline, or host it anywhere.</p>
       </div>
     </div>
@@ -274,14 +274,14 @@ footer a:hover{color:var(--muted)}
   <div class="section-label">The prompt</div>
   <div class="prompt-box">
     <div class="prompt-header">
-      <span class="prompt-title">Editorial rewrite prompt</span>
+      <span class="prompt-title">Optional rewrite prompt</span>
       <button class="btn btn-accent" id="copy-btn" onclick="copyPrompt()">Copy prompt</button>
     </div>
-    <p class="prompt-desc">This prompt instructs an LLM to rewrite long-form text as structured, compressed, navigable documentation — optimized for the renderer's <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> page model. Paste your source text after the <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px">---</code> at the end.</p>
+    <p class="prompt-desc">This is a helper for rough source material, not the core product. It asks any LLM to produce structured markdown optimized for the renderer's <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> page model. Paste your source text after the <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px">---</code> at the end.</p>
   </div>
 
   <footer>
-    <span>Cognitiva<span style="color:#dc2626">.</span> &nbsp;·&nbsp; docs toolkit</span>
+    <span>Cognitiva<span style="color:#dc2626">.</span> &nbsp;·&nbsp; markdown docs reader</span>
     <a href="https://github.com/franciscobeccaria/cognitiva-docs" target="_blank">GitHub →</a>
   </footer>
 
