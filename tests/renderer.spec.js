@@ -172,13 +172,14 @@ test.describe('Editor UI', () => {
   test('color preset radios are present', async ({ page }, testInfo) => {
     await page.click('#settings-btn');
     const panel = page.locator('#settings-panel');
+    await expect(panel.locator('[name="color-preset"][value="cognitiva"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="notion"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="linear"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="apple"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="github"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="stripe"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="figma"]')).toHaveCount(1);
-    await expect(panel.locator('[name="color-preset"][value="notion"]')).toBeChecked();
+    await expect(panel.locator('[name="color-preset"][value="cognitiva"]')).toBeChecked();
     await snap(page, testInfo, 'color-presets');
   });
 

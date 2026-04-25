@@ -31,12 +31,21 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14
 
 /* ---- Editor view ---- */
 #editor{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 20px 60px}
-.app-header{width:100%;max-width:800px;padding:26px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:28px}
-.app-brand{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.4px}
+.app-header{width:100%;max-width:800px;padding:26px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:28px;gap:16px}
+.app-brand{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.4px;text-decoration:none}
 .app-brand .dot{color:#dc2626}
-.app-tag{font-family:var(--fm);font-size:10px;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase}
+.app-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.app-nav a,.app-tag{font-family:var(--fm);font-size:10px;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;text-decoration:none}
+.app-nav a:hover{color:var(--muted)}
 .editor-body{width:100%;max-width:800px}
 .editor-label{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.flow-panel{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 13px;min-width:0}
+.flow-kicker{display:block;font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.flow-step strong{display:block;font-size:12.5px;color:var(--ink);line-height:1.35;margin-bottom:3px}
+.flow-step span:last-child{display:block;font-size:11.5px;color:var(--muted);line-height:1.45}
+@media(max-width:760px){.flow-panel{grid-template-columns:1fr 1fr}.app-header{align-items:flex-start;flex-direction:column}.app-nav{justify-content:flex-start}}
+@media(max-width:480px){.flow-panel{grid-template-columns:1fr}}
 
 #md-input{
   width:100%;height:480px;padding:16px 18px;
@@ -69,6 +78,7 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14
 .font-opts input[type=radio],.color-opts input[type=radio]{cursor:pointer;accent-color:var(--accent)}
 .color-swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--border-hi);box-shadow:inset 0 0 0 2px var(--surface)}
 .swatch-notion{background:#2f3437}
+.swatch-cognitiva{background:#c94a35}
 .swatch-linear{background:#5e6ad2}
 .swatch-apple{background:#0071e3}
 .swatch-github{background:#0969da}
@@ -85,10 +95,36 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14
 <!-- ==================== EDITOR ==================== -->
 <div id="editor">
   <header class="app-header">
-    <span class="app-brand">Cognitiva<span class="dot">.</span></span>
-    <span class="app-tag">Markdown → docs</span>
+    <a class="app-brand" href="index.html">Cognitiva<span class="dot">.</span></a>
+    <nav class="app-nav" aria-label="Product navigation">
+      <span class="app-tag">Markdown → docs</span>
+      <a href="index.html">Home</a>
+      <a href="template.html">Template</a>
+    </nav>
   </header>
   <div class="editor-body">
+    <div class="flow-panel" aria-label="Suggested workflow">
+      <div class="flow-step">
+        <span class="flow-kicker">01</span>
+        <strong>Copy prompt</strong>
+        <span>Use it only when your source needs cleanup.</span>
+      </div>
+      <div class="flow-step">
+        <span class="flow-kicker">02</span>
+        <strong>Generate markdown</strong>
+        <span>Iterate in your usual chat app.</span>
+      </div>
+      <div class="flow-step">
+        <span class="flow-kicker">03</span>
+        <strong>Paste here</strong>
+        <span>Bring the final markdown into Cognitiva.</span>
+      </div>
+      <div class="flow-step">
+        <span class="flow-kicker">04</span>
+        <strong>Render docs</strong>
+        <span>Read, navigate, copy, or download HTML.</span>
+      </div>
+    </div>
     <div class="editor-label">Paste your markdown</div>
     <textarea id="md-input" spellcheck="false" placeholder="# Document Title
 
@@ -132,7 +168,8 @@ Multiple # H1 headings → each H1 becomes a page."></textarea>
       <div class="settings-row">
         <span class="settings-label">Colores</span>
         <div class="color-opts">
-          <label><input type="radio" name="color-preset" value="notion" checked><span class="color-swatch swatch-notion"></span>Notion</label>
+          <label><input type="radio" name="color-preset" value="cognitiva" checked><span class="color-swatch swatch-cognitiva"></span>Cognitiva</label>
+          <label><input type="radio" name="color-preset" value="notion"><span class="color-swatch swatch-notion"></span>Notion</label>
           <label><input type="radio" name="color-preset" value="linear"><span class="color-swatch swatch-linear"></span>Linear</label>
           <label><input type="radio" name="color-preset" value="apple"><span class="color-swatch swatch-apple"></span>Apple</label>
           <label><input type="radio" name="color-preset" value="github"><span class="color-swatch swatch-github"></span>GitHub</label>
@@ -522,6 +559,7 @@ function buildHTML(pages, docTitle, splitLevel, fontPreset, colorPreset, docDesc
     '    <button class="download-html-btn" id="download-html-btn" onclick="window.parent.postMessage(\'download\',\'*\')">Download HTML</button>',
     '    <button class="copy-md-btn" id="copy-md-btn" onclick="copyMarkdown()">Copy markdown</button>',
     '    <button class="back-to-editor" onclick="window.parent.postMessage(\'back\',\'*\')">← Editor</button>',
+    '    <a class="home-link" href="index.html" target="_parent">← Home</a>',
     '  </div>',
     '</div></aside>',
     '',
@@ -615,6 +653,10 @@ function templateCSS(fontPreset, colorPreset) {
   };
   var fp = presets[fontPreset] || presets.clean;
   var colorPresets = {
+    cognitiva: {
+      light: { paper:'oklch(0.985 0.005 80)', surface:'oklch(1 0 0)', surface2:'oklch(0.97 0.008 80)', rule:'oklch(0.87 0.01 60)', border:'rgba(0,0,0,0.07)', borderHi:'rgba(0,0,0,0.13)', ink:'oklch(0.18 0.01 60)', muted:'oklch(0.50 0.01 60)', faint:'oklch(0.72 0.01 60)', accent:'oklch(0.55 0.18 28)', accentSoft:'oklch(0.95 0.035 30)' },
+      dark:  { paper:'oklch(0.16 0.01 60)', surface:'oklch(0.19 0.012 60)', surface2:'oklch(0.22 0.012 60)', rule:'oklch(0.27 0.01 60)', border:'rgba(255,255,255,0.08)', borderHi:'rgba(255,255,255,0.15)', ink:'oklch(0.91 0.005 60)', muted:'oklch(0.65 0.008 60)', faint:'oklch(0.42 0.008 60)', accent:'oklch(0.72 0.14 28)', accentSoft:'oklch(0.25 0.06 28)' }
+    },
     notion: {
       light: { paper:'oklch(0.985 0.004 88)', surface:'oklch(1 0 0)', surface2:'oklch(0.965 0.005 88)', rule:'oklch(0.88 0.006 88)', border:'rgba(55,53,47,0.10)', borderHi:'rgba(55,53,47,0.20)', ink:'oklch(0.23 0.006 85)', muted:'oklch(0.48 0.006 85)', faint:'oklch(0.70 0.006 85)', accent:'oklch(0.37 0.012 85)', accentSoft:'oklch(0.94 0.006 85)' },
       dark:  { paper:'oklch(0.19 0.006 85)', surface:'oklch(0.23 0.006 85)', surface2:'oklch(0.27 0.006 85)', rule:'oklch(0.34 0.006 85)', border:'rgba(255,255,255,0.09)', borderHi:'rgba(255,255,255,0.18)', ink:'oklch(0.90 0.004 85)', muted:'oklch(0.68 0.005 85)', faint:'oklch(0.46 0.005 85)', accent:'oklch(0.82 0.006 85)', accentSoft:'oklch(0.30 0.006 85)' }
@@ -640,7 +682,7 @@ function templateCSS(fontPreset, colorPreset) {
       dark:  { paper:'oklch(0.16 0.016 320)', surface:'oklch(0.20 0.018 320)', surface2:'oklch(0.24 0.022 320)', rule:'oklch(0.31 0.022 320)', border:'rgba(255,255,255,0.09)', borderHi:'rgba(255,255,255,0.18)', ink:'oklch(0.92 0.006 320)', muted:'oklch(0.68 0.016 320)', faint:'oklch(0.47 0.016 320)', accent:'oklch(0.74 0.20 315)', accentSoft:'oklch(0.29 0.085 315)' }
     }
   };
-  var cp = colorPresets[colorPreset] || colorPresets.notion;
+  var cp = colorPresets[colorPreset] || colorPresets.cognitiva;
   function colorVars(c) {
     return '--color-paper:' + c.paper + ';' +
       '--color-surface:' + c.surface + ';' +
@@ -701,6 +743,8 @@ function templateCSS(fontPreset, colorPreset) {
   '.download-html-btn:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
   '.copy-md-btn{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%}' +
   '.copy-md-btn:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
+  '.home-link{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%;text-decoration:none}' +
+  '.home-link:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
   // Reopen
   '.sidebar-reopen{position:fixed;top:18px;left:12px;z-index:400;width:28px;height:28px;border:1px solid var(--color-rule);background:var(--color-paper);border-radius:7px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--color-muted);box-shadow:0 1px 6px rgba(0,0,0,0.08);transition:background 0.13s}' +
   '.sidebar-reopen:hover{background:var(--color-surface2)}' +
@@ -895,7 +939,7 @@ function renderDoc() {
   var checkedFont = document.querySelector('[name="font-preset"]:checked');
   var checkedColor = document.querySelector('[name="color-preset"]:checked');
   var fontPreset = checkedFont ? checkedFont.value : 'clean';
-  var colorPreset = checkedColor ? checkedColor.value : 'notion';
+  var colorPreset = checkedColor ? checkedColor.value : 'cognitiva';
   _html = buildHTML(result.pages, result.docTitle, result.splitLevel, fontPreset, colorPreset, result.docDescription || '', md);
 
   var frame = document.getElementById('preview-frame');

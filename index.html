@@ -69,6 +69,17 @@ h1{
   font-size:17px;color:var(--muted);
   line-height:1.7;max-width:560px;
 }
+.header-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.btn-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:38px;padding:8px 15px;border-radius:8px;
+  border:1px solid var(--border);text-decoration:none;
+  font-size:13px;font-weight:600;color:var(--muted);
+  transition:background 0.13s,border-color 0.13s,color 0.13s;
+}
+.btn-link:hover{background:var(--surface2);border-color:var(--border-hi);color:var(--ink)}
+.btn-link.primary{background:var(--accent);border-color:transparent;color:#fff}
+.btn-link.primary:hover{filter:brightness(1.08)}
 
 /* ---- Tools grid ---- */
 .tools{
@@ -208,7 +219,11 @@ footer a:hover{color:var(--muted)}
   <header>
     <div class="brand">Cognitiva<span class="dot">.</span></div>
     <h1>Markdown<br>docs reader</h1>
-    <p class="lead">Paste existing markdown and read it as a clean, navigable 3-column documentation page — no build tools, no account, no generation required.</p>
+    <p class="lead">Use your usual chat app to shape rough material into markdown, then paste it into Cognitiva to read it as a clean, navigable documentation page.</p>
+    <div class="header-actions">
+      <a class="btn-link primary" href="renderer.html">Open renderer</a>
+      <a class="btn-link" href="#flow">See workflow</a>
+    </div>
   </header>
 
   <!-- Tools -->
@@ -238,34 +253,34 @@ footer a:hover{color:var(--muted)}
   </div>
 
   <!-- How it works -->
-  <div class="section-label">How it works</div>
+  <div class="section-label" id="flow">How it works</div>
   <div class="steps">
     <div class="step">
       <span class="step-num">01</span>
       <div class="step-body">
-        <h3>Paste markdown</h3>
-        <p>Start with markdown you already have: notes, guides, documentation, study material, research summaries, or an LLM output from any chat.</p>
+        <h3>Copy the prompt</h3>
+        <p>Use the prompt when your source material is rough, long, or unstructured. It tells your chat app how to produce markdown that Cognitiva can render well.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">02</span>
       <div class="step-body">
-        <h3>Render the reader</h3>
-        <p>Click <strong>Render →</strong>. Cognitiva turns headings into navigation: <code># H1</code> pages, <code>## H2</code> sections, and a right-side table of contents.</p>
+        <h3>Generate or clean markdown</h3>
+        <p>Paste the prompt and your source text into any LLM. Iterate there until the result has clear <code># H1</code> pages and useful <code>## H2</code> sections.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">03</span>
       <div class="step-body">
-        <h3>Use the prompt only if needed</h3>
-        <p>If your source is messy or too long, copy the optional prompt and use it in your preferred chat app to get cleaner markdown for the renderer.</p>
+        <h3>Paste into Cognitiva</h3>
+        <p>Bring the final markdown into the renderer. You can also skip the prompt entirely if you already have good markdown.</p>
       </div>
     </div>
     <div class="step">
       <span class="step-num">04</span>
       <div class="step-body">
-        <h3>Share the HTML</h3>
-        <p>The rendered result is a self-contained <code>.html</code> file — no server needed. Share it, open it offline, or host it anywhere.</p>
+        <h3>Render and share</h3>
+        <p>Cognitiva turns headings into navigation and gives you a readable doc with sidebar pages, right TOC, previous/next navigation, and downloadable HTML.</p>
       </div>
     </div>
   </div>
@@ -277,12 +292,18 @@ footer a:hover{color:var(--muted)}
       <span class="prompt-title">Optional rewrite prompt</span>
       <button class="btn btn-accent" id="copy-btn" onclick="copyPrompt()">Copy prompt</button>
     </div>
-    <p class="prompt-desc">This is a helper for rough source material, not the core product. It asks any LLM to produce structured markdown optimized for the renderer's <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> page model. Paste your source text after the <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px">---</code> at the end.</p>
+    <p class="prompt-desc">This is the bridge between chat and Cognitiva. It asks any LLM to produce structured markdown optimized for the renderer's <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> page model. Paste your source text after the <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px">---</code> at the end.</p>
   </div>
 
   <footer>
     <span>Cognitiva<span style="color:#dc2626">.</span> &nbsp;·&nbsp; markdown docs reader</span>
-    <a href="https://github.com/franciscobeccaria/cognitiva-docs" target="_blank">GitHub →</a>
+    <span>
+      <a href="renderer.html">Renderer →</a>
+      &nbsp;·&nbsp;
+      <a href="template.html">Template →</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/franciscobeccaria/cognitiva-docs" target="_blank">GitHub →</a>
+    </span>
   </footer>
 
 </div>
