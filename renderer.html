@@ -482,6 +482,20 @@ function buildSections(htmlStr, pageSlug, sectionTag) {
   return sections;
 }
 
+function transformMermaidBlocks(htmlStr) {
+  var div = document.createElement('div');
+  div.innerHTML = htmlStr;
+  Array.from(div.querySelectorAll('pre > code.language-mermaid')).forEach(function(code) {
+    var pre = code.parentElement;
+    if (!pre || !pre.parentElement) return;
+    var block = document.createElement('div');
+    block.className = 'mermaid';
+    block.textContent = code.textContent || '';
+    pre.parentElement.replaceChild(block, pre);
+  });
+  return div.innerHTML;
+}
+
 /* ============================================================
    FONT LINKS for generated HTML HEAD
    ============================================================ */
@@ -580,6 +594,7 @@ function buildHTML(pages, docTitle, splitLevel, fontPreset, colorPreset, docDesc
     '',
     '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"><\/script>',
     '<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"><\/script>',
+    '<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"><\/script>',
     '<script>',
     'var __rawMd=' + JSON.stringify(rawMd || '').replace(/<\/script/gi, '<\\/script') + ';',
     templateJS(firstSlug, sectionTag),
@@ -600,6 +615,7 @@ function buildPage(page, i, pages, splitLevel, docTitle) {
 
   /* Parse markdown */
   var rawHTML = marked.parse(page.content || '');
+  rawHTML = transformMermaidBlocks(rawHTML);
   rawHTML = rawHTML
     .replace(/<table>/g, '<div class="table-wrap"><table>')
     .replace(/<\/table>/g, '</table></div>');
@@ -732,7 +748,7 @@ function templateCSS(fontPreset, colorPreset) {
   '.doc-description p:last-child{margin-bottom:0}' +
   '.sidebar-nav{padding:18px 10px 0}' +
   '.nav-section{margin-bottom:18px}' +
-  '.nav-item{display:block;font-size:12.5px;font-weight:400;color:var(--color-muted);text-decoration:none;padding:5px 10px;border-radius:7px;cursor:pointer;transition:color 0.13s,background 0.13s;margin-bottom:1px;line-height:1.35;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+  '.nav-item{display:block;font-size:12.5px;font-weight:400;color:var(--color-muted);text-decoration:none;padding:5px 10px;border-radius:7px;cursor:pointer;transition:color 0.13s,background 0.13s;margin-bottom:1px;line-height:1.35;user-select:none;white-space:normal;overflow-wrap:anywhere;word-break:break-word}' +
   '.nav-item:hover{color:var(--color-ink);background:var(--color-surface2)}' +
   '.nav-item.active{color:var(--color-accent);background:var(--color-accent-soft);font-weight:500}' +
   // Sidebar footer (download + copy md + back-to-editor)
@@ -795,6 +811,8 @@ function templateCSS(fontPreset, colorPreset) {
   '.prose pre{background:var(--color-surface2);border:1px solid var(--color-border);border-radius:9px;font-family:var(--font-mono);font-size:12px;line-height:1.7;padding:14px 16px;overflow-x:auto}' +
   '.prose pre code{font-family:var(--font-mono);font-size:inherit;background:none;border:none;padding:0;color:var(--color-ink)}' +
   '.prose code{font-family:var(--font-mono);font-size:11.5px;background:var(--color-surface2);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;color:var(--color-ink)}' +
+  '.prose .mermaid{background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px;padding:16px;overflow-x:auto}' +
+  '.prose .mermaid svg{display:block;max-width:100%;height:auto;margin:0 auto}' +
   '.prose hr{border:none;border-top:1px solid var(--color-border)}' +
   '.prose a{color:var(--color-accent);text-decoration:none}' +
   '.prose a:hover{text-decoration:underline}' +
@@ -808,7 +826,7 @@ function templateCSS(fontPreset, colorPreset) {
   '.otp-indicator{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:var(--color-accent);pointer-events:none;' +
     'clip-path:polygon(0 var(--otp-top,0px),100% var(--otp-top,0px),100% calc(var(--otp-top,0px) + var(--otp-height,0px)),0 calc(var(--otp-top,0px) + var(--otp-height,0px)));' +
     'transition:clip-path 200ms cubic-bezier(0.4,0,0.2,1)}' +
-  '.otp-link{display:block;font-size:12px;color:var(--color-muted);text-decoration:none;padding:3.5px 8px 3.5px 12px;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color 0.12s}' +
+  '.otp-link{display:block;font-size:12px;color:var(--color-muted);text-decoration:none;padding:3.5px 8px 3.5px 12px;line-height:1.45;white-space:normal;overflow-wrap:anywhere;word-break:break-word;transition:color 0.12s}' +
   '.otp-link:hover{color:var(--color-ink)}' +
   '.otp-link.active{color:var(--color-accent);font-weight:500}' +
   // Responsive
@@ -822,7 +840,7 @@ function templateCSS(fontPreset, colorPreset) {
     '.doc-identity{padding:0;display:none}' +
     '.doc-description{display:none}' +
     '.sidebar-nav{padding:0;display:flex;gap:2px;flex-shrink:0}' +
-    '.nav-item{flex-shrink:0;font-size:12px;padding:5px 9px}' +
+    '.nav-item{flex-shrink:0;font-size:12px;padding:5px 9px;white-space:nowrap;word-break:normal}' +
     '.sidebar-right-col{display:none}' +
     '.main{padding:24px 20px 60px}' +
     '.sidebar-footer{display:none}' +
@@ -848,6 +866,7 @@ function templateJS(firstSlug, sectionTag) {
     '  if(nav)nav.classList.add("active");\n' +
     '  window.scrollTo({top:0,behavior:"instant"});\n' +
     '  buildTOC(id);\n' +
+    '  renderMermaid();\n' +
     '}\n' +
 
     'var tocObs=null;\n' +
@@ -913,8 +932,23 @@ function templateJS(firstSlug, sectionTag) {
     '  else{var ta=document.createElement("textarea");ta.value=__rawMd;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);done();}\n' +
     '}\n' +
 
+    'function sanitizeMermaidDefinition(input){\n' +
+    '  return String(input||"").replace(/<[^>]*>/g,"");\n' +
+    '}\n' +
+
+    'function renderMermaid(){\n' +
+    '  if(!window.mermaid)return;\n' +
+    '  document.querySelectorAll(".page.active .mermaid").forEach(function(el){\n' +
+    '    if(el.getAttribute("data-processed")==="true")return;\n' +
+    '    el.textContent=sanitizeMermaidDefinition(el.textContent);\n' +
+    '  });\n' +
+    '  window.mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"default"});\n' +
+    '  window.mermaid.run({querySelector:".page.active .mermaid"}).catch(function(){});\n' +
+    '}\n' +
+
     'document.getElementById("sidebar-reopen").style.display="none";\n' +
-    'buildTOC("' + firstSlug + '");\n'
+    'buildTOC("' + firstSlug + '");\n' +
+    'renderMermaid();\n'
   );
 }
 
