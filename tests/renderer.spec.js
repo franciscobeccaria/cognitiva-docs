@@ -561,7 +561,9 @@ test.describe('Sidebars and Mermaid', () => {
 
   test('mermaid fenced code blocks are converted to .mermaid containers', async ({ page }, testInfo) => {
     const frame = await renderMarkdown(page, MD_LONG_SIDEBAR_AND_MERMAID);
-    await expect(frame.locator('.prose .mermaid')).toHaveCount(1);
+    const mermaid = frame.locator('.prose .mermaid');
+    await expect(mermaid).toHaveCount(1);
+    await expect(mermaid.locator('svg')).toHaveCount(1);
     await expect(frame.locator('.prose pre code.language-mermaid')).toHaveCount(0);
     await snap(page, testInfo, 'mermaid-container');
   });

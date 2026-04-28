@@ -932,9 +932,17 @@ function templateJS(firstSlug, sectionTag) {
     '  else{var ta=document.createElement("textarea");ta.value=__rawMd;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);done();}\n' +
     '}\n' +
 
+    'function sanitizeMermaidDefinition(input){\n' +
+    '  return String(input||"").replace(/<[^>]*>/g,"");\n' +
+    '}\n' +
+
     'function renderMermaid(){\n' +
     '  if(!window.mermaid)return;\n' +
-    '  window.mermaid.initialize({startOnLoad:false,securityLevel:"loose",theme:"default"});\n' +
+    '  document.querySelectorAll(".page.active .mermaid").forEach(function(el){\n' +
+    '    if(el.getAttribute("data-processed")==="true")return;\n' +
+    '    el.textContent=sanitizeMermaidDefinition(el.textContent);\n' +
+    '  });\n' +
+    '  window.mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"default"});\n' +
     '  window.mermaid.run({querySelector:".page.active .mermaid"}).catch(function(){});\n' +
     '}\n' +
 
