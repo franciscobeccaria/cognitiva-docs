@@ -98,6 +98,20 @@ Contenido.
 
 Contenido.`;
 
+const MD_LONG_SIDEBAR_AND_MERMAID = `# Documento con títulos largos para validar sidebars sin ellipsis
+
+## Sección con título extremadamente largo para comprobar que el sidebar izquierdo muestra múltiples líneas completas sin recortar el texto
+
+### Un encabezado h3 excesivamente largo para comprobar que el sidebar derecho on this page no aplica truncado con puntos suspensivos
+
+\`\`\`mermaid
+flowchart TD
+  A[Inicio] --> B{¿Renderiza Mermaid?}
+  B -->|Sí| C[Perfecto]
+  B -->|No| D[Revisar configuración]
+\`\`\`
+`;
+
 // Helper: paste markdown, click Render, wait for iframe
 async function renderMarkdown(page, markdown) {
   await page.fill('#md-input', markdown);
@@ -510,6 +524,48 @@ Otro capítulo.`;
     const navItems = frame.locator('.nav-item');
     await expect(navItems.nth(1)).toHaveClass(/active/);
     await snap(page, testInfo, 'prev-next-after-next');
+  });
+});
+
+/* ============================================================
+   SIDEBARS + MERMAID
+   ============================================================ */
+test.describe('Sidebars and Mermaid', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/renderer.html');
+  });
+
+  test('left and right sidebars allow wrapped labels (no ellipsis styles)', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_LONG_SIDEBAR_AND_MERMAID);
+    const navStyles = await frame.locator('.nav-item').first().evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        whiteSpace: s.whiteSpace,
+        textOverflow: s.textOverflow,
+      };
+    });
+    expect(navStyles.whiteSpace).toBe('normal');
+    expect(navStyles.textOverflow).toBe('clip');
+
+    const otpStyles = await frame.locator('.otp-link').first().evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        whiteSpace: s.whiteSpace,
+        textOverflow: s.textOverflow,
+      };
+    });
+    expect(otpStyles.whiteSpace).toBe('normal');
+    expect(otpStyles.textOverflow).toBe('clip');
+    await snap(page, testInfo, 'sidebars-no-ellipsis');
+  });
+
+  test('mermaid fenced code blocks are converted to .mermaid containers', async ({ page }, testInfo) => {
+    const frame = await renderMarkdown(page, MD_LONG_SIDEBAR_AND_MERMAID);
+    const mermaid = frame.locator('.prose .mermaid');
+    await expect(mermaid).toHaveCount(1);
+    await expect(mermaid.locator('svg')).toHaveCount(1);
+    await expect(frame.locator('.prose pre code.language-mermaid')).toHaveCount(0);
+    await snap(page, testInfo, 'mermaid-container');
   });
 });
 
