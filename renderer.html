@@ -68,17 +68,23 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14
 .btn-primary:hover{filter:brightness(1.1)}
 
 /* ---- Settings panel ---- */
-.settings-panel{margin-top:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}
-.settings-intro{font-size:12.5px;line-height:1.55;color:var(--muted);margin:0 0 12px}
+.settings-panel{margin-top:14px;padding:18px;background:linear-gradient(180deg,color-mix(in oklab,var(--surface2) 82%,white) 0%,var(--surface2) 100%);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.settings-intro{font-size:13px;line-height:1.55;color:var(--muted);margin:0 0 14px}
 .settings-intro strong{color:var(--ink)}
-.settings-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.settings-row+.settings-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
-.settings-label{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
-.font-opts,.color-opts{display:flex;gap:14px;flex-wrap:wrap}
-.font-opts label,.color-opts label{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);cursor:pointer}
-.font-opts label:hover,.color-opts label:hover{color:var(--ink)}
-.font-opts input[type=radio],.color-opts input[type=radio]{cursor:pointer;accent-color:var(--accent)}
-.color-swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--border-hi);box-shadow:inset 0 0 0 2px var(--surface)}
+.settings-row{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.settings-row+.settings-row{margin-top:14px;padding-top:14px;border-top:1px solid color-mix(in oklab,var(--border) 80%, transparent)}
+.settings-label{font-family:var(--fm);font-size:10px;font-weight:700;color:var(--faint);letter-spacing:0.14em;text-transform:uppercase;flex-shrink:0;padding-top:7px;min-width:210px}
+.font-opts,.color-opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.font-opts label,.color-opts label{position:relative;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 12px;transition:all .16s ease}
+.font-opts label:hover,.color-opts label:hover{border-color:var(--border-hi);background:color-mix(in oklab,var(--surface2) 65%,white);color:var(--ink);transform:translateY(-1px)}
+.font-opts input[type=radio],.color-opts input[type=radio]{appearance:none;width:13px;height:13px;border-radius:50%;border:1.5px solid color-mix(in oklab,var(--muted) 75%,white);background:white;display:inline-grid;place-content:center;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
+.font-opts input[type=radio]::before,.color-opts input[type=radio]::before{content:"";width:7px;height:7px;border-radius:50%;transform:scale(0);transition:transform .14s ease;background:var(--accent)}
+.font-opts input[type=radio]:checked,.color-opts input[type=radio]:checked{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in oklab,var(--accent) 18%,white)}
+.font-opts input[type=radio]:checked::before,.color-opts input[type=radio]:checked::before{transform:scale(1)}
+.font-opts label:has(input:checked),.color-opts label:has(input:checked){border-color:color-mix(in oklab,var(--accent) 58%, var(--border));background:color-mix(in oklab,var(--accent-soft) 70%,white);color:var(--ink);font-weight:600;box-shadow:0 2px 10px color-mix(in oklab,var(--accent) 18%, transparent)}
+.font-opts label:has(input:focus-visible),.color-opts label:has(input:focus-visible){outline:2px solid color-mix(in oklab,var(--accent) 45%,white);outline-offset:2px}
+.color-swatch{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.8);box-shadow:0 0 0 1px var(--border-hi), inset 0 0 0 2px rgba(255,255,255,.62)}
+@media(max-width:760px){.settings-label{min-width:100%;padding-top:0}}
 .swatch-notion{background:#2f3437}
 .swatch-cognitiva{background:#c94a35}
 .swatch-linear{background:#5e6ad2}
