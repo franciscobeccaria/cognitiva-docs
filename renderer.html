@@ -69,6 +69,8 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:14
 
 /* ---- Settings panel ---- */
 .settings-panel{margin-top:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}
+.settings-intro{font-size:12.5px;line-height:1.55;color:var(--muted);margin:0 0 12px}
+.settings-intro strong{color:var(--ink)}
 .settings-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .settings-row+.settings-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
 .settings-label{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
@@ -149,15 +151,15 @@ Multiple # H1 headings → each H1 becomes a page."></textarea>
         One <code># H1</code> + multiple <code>## H2</code>s &rarr; each H2 becomes a page &nbsp;&nbsp;·&nbsp;&nbsp; Multiple <code># H1</code>s &rarr; each H1 becomes a page &nbsp;&nbsp;·&nbsp;&nbsp; <code>### H3</code>s always become sections within their page
       </span>
       <div class="actions-right">
-        <button class="btn btn-ghost" id="settings-btn" onclick="toggleSettings()">Settings</button>
-        <button class="btn btn-ghost" id="copy-prompt-btn" onclick="copyPrompt()">Copy prompt</button>
+                <button class="btn btn-ghost" id="copy-prompt-btn" onclick="copyPrompt()">Copy prompt</button>
         <button class="btn btn-ghost" onclick="loadExample()">Load example</button>
         <button class="btn btn-primary" onclick="renderDoc()">Render →</button>
       </div>
     </div>
-    <div id="settings-panel" class="settings-panel" style="display:none">
+    <div id="settings-panel" class="settings-panel" aria-label="Render settings">
+      <p class="settings-intro"><strong>Render settings</strong> apply instantly to the preview and exported HTML.</p>
       <div class="settings-row">
-        <span class="settings-label">Tipografía</span>
+        <span class="settings-label">Tipografía / Typeface</span>
         <div class="font-opts">
           <label><input type="radio" name="font-preset" value="editorial"> Editorial</label>
           <label><input type="radio" name="font-preset" value="clean" checked> Clean</label>
@@ -166,7 +168,7 @@ Multiple # H1 headings → each H1 becomes a page."></textarea>
         </div>
       </div>
       <div class="settings-row">
-        <span class="settings-label">Colores</span>
+        <span class="settings-label">Colores / Accent</span>
         <div class="color-opts">
           <label><input type="radio" name="color-preset" value="cognitiva" checked><span class="color-swatch swatch-cognitiva"></span>Cognitiva</label>
           <label><input type="radio" name="color-preset" value="notion"><span class="color-swatch swatch-notion"></span>Notion</label>
@@ -787,28 +789,28 @@ function templateCSS(fontPreset, colorPreset) {
   // Prose
   '.prose{min-width:0}' +
   '.prose>*+*{margin-top:18px}' +
-  '.prose p{font-size:14.5px;color:var(--color-muted);line-height:1.78;overflow-wrap:break-word}' +
+  '.prose p{font-size:16px;color:var(--color-muted);line-height:1.5;overflow-wrap:break-word}' +
   '.prose strong{color:var(--color-ink);font-weight:600}' +
   '.prose em{font-style:italic}' +
   '.prose h3{font-size:14px;font-weight:600;color:var(--color-ink);margin-top:24px;margin-bottom:8px;letter-spacing:-0.1px}' +
   '.prose h4{font-size:13px;font-weight:600;color:var(--color-muted);margin-top:18px;margin-bottom:6px}' +
-  '.prose ul,.prose ol{padding-left:20px;color:var(--color-muted);font-size:14.5px;line-height:1.7}' +
+  '.prose ul,.prose ol{padding-left:20px;color:var(--color-muted);font-size:16px;line-height:1.5}' +
   '.prose ul{list-style:disc}' +
   '.prose ol{list-style:decimal}' +
   '.prose li{margin-bottom:5px;overflow-wrap:break-word}' +
   '.prose li:last-child{margin-bottom:0}' +
   '.prose li>ul,.prose li>ol{margin-top:5px}' +
-  '.prose blockquote{border-left:3px solid var(--color-accent);background:var(--color-accent-soft);border-radius:0 8px 8px 0;padding:13px 18px;font-family:var(--font-display);font-size:15px;font-style:italic;color:var(--color-muted);line-height:1.7;overflow-wrap:break-word}' +
-  '.prose blockquote p{font-size:15px;font-family:var(--font-display);font-style:italic;color:var(--color-muted);margin:0}' +
+  '.prose blockquote{border-left:3px solid var(--color-accent);background:var(--color-accent-soft);border-radius:0 8px 8px 0;padding:13px 18px;font-family:var(--font-display);font-size:16px;font-style:italic;color:var(--color-muted);line-height:1.5;overflow-wrap:break-word}' +
+  '.prose blockquote p{font-size:16px;font-family:var(--font-display);font-style:italic;color:var(--color-muted);margin:0;line-height:1.5}' +
   '.prose .table-wrap{overflow-x:auto;background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px;scrollbar-width:thin}' +
   '.prose table{width:100%;border-collapse:collapse;font-size:13px}' +
   '.prose thead th{background:var(--color-surface2);padding:9px 14px;text-align:left;font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-muted);border-bottom:1px solid var(--color-border);white-space:nowrap}' +
   '.prose tbody tr{border-bottom:1px solid var(--color-border);transition:background 0.1s}' +
   '.prose tbody tr:last-child{border-bottom:none}' +
   '.prose tbody tr:hover{background:var(--color-surface2)}' +
-  '.prose td{padding:9px 14px;color:var(--color-muted);vertical-align:top;min-width:0;overflow-wrap:break-word;line-height:1.55}' +
+  '.prose td{padding:9px 14px;color:var(--color-muted);vertical-align:top;min-width:0;overflow-wrap:break-word;font-size:16px;line-height:1.5}' +
   '.prose td:first-child{color:var(--color-ink);font-weight:500}' +
-  '.prose pre{background:var(--color-surface2);border:1px solid var(--color-border);border-radius:9px;font-family:var(--font-mono);font-size:12px;line-height:1.7;padding:14px 16px;overflow-x:auto}' +
+  '.prose pre{background:var(--color-surface2);border:1px solid var(--color-border);border-radius:9px;font-family:var(--font-mono);font-size:14px;line-height:1.5;padding:14px 16px;overflow-x:auto}' +
   '.prose pre code{font-family:var(--font-mono);font-size:inherit;background:none;border:none;padding:0;color:var(--color-ink)}' +
   '.prose code{font-family:var(--font-mono);font-size:11.5px;background:var(--color-surface2);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;color:var(--color-ink)}' +
   '.prose .mermaid{background:var(--color-surface);border:1px solid var(--color-border);border-radius:10px;padding:16px;overflow-x:auto}' +
@@ -957,13 +959,6 @@ function templateJS(firstSlug, sectionTag) {
    ============================================================ */
 var _html = '';
 
-function toggleSettings() {
-  var panel = document.getElementById('settings-panel');
-  var btn = document.getElementById('settings-btn');
-  var isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
-  btn.style.color = isOpen ? '' : 'var(--ink)';
-}
 
 function renderDoc() {
   var md = document.getElementById('md-input').value.trim();

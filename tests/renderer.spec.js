@@ -157,23 +157,18 @@ test.describe('Editor UI', () => {
   test('editor shows textarea and action buttons', async ({ page }, testInfo) => {
     await expect(page.locator('#md-input')).toBeVisible();
     await expect(page.locator('button.btn-primary')).toContainText('Render');
-    await expect(page.locator('#settings-btn')).toContainText('Settings');
+    await expect(page.locator('#settings-panel')).toBeVisible();
     await snap(page, testInfo, 'editor-full-view');
   });
 
-  test('settings panel toggles open and closed', async ({ page }, testInfo) => {
+  test('settings panel is always visible with helper copy', async ({ page }, testInfo) => {
     const panel = page.locator('#settings-panel');
-    await expect(panel).toBeHidden();
-    await page.click('#settings-btn');
     await expect(panel).toBeVisible();
-    await snap(page, testInfo, 'settings-panel-open');
-    await page.click('#settings-btn');
-    await expect(panel).toBeHidden();
-    await snap(page, testInfo, 'settings-panel-closed');
+    await expect(panel).toContainText('Render settings');
+    await snap(page, testInfo, 'settings-panel-visible');
   });
 
   test('font preset radios are present', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     const panel = page.locator('#settings-panel');
     await expect(panel.locator('[value="editorial"]')).toHaveCount(1);
     await expect(panel.locator('[value="clean"]')).toHaveCount(1);
@@ -184,7 +179,6 @@ test.describe('Editor UI', () => {
   });
 
   test('color preset radios are present', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     const panel = page.locator('#settings-panel');
     await expect(panel.locator('[name="color-preset"][value="cognitiva"]')).toHaveCount(1);
     await expect(panel.locator('[name="color-preset"][value="notion"]')).toHaveCount(1);
@@ -365,7 +359,6 @@ test.describe('Typography Presets', () => {
   });
 
   test('editorial preset uses Fraunces for headings', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="font-preset"][value="editorial"]');
     await snap(page, testInfo, 'preset-editorial-selected');
     const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
@@ -379,7 +372,6 @@ test.describe('Typography Presets', () => {
   });
 
   test('clean preset uses Inter for display font', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="font-preset"][value="clean"]');
     const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
     const fontDisplay = await frame.locator('body').evaluate(() =>
@@ -390,7 +382,6 @@ test.describe('Typography Presets', () => {
   });
 
   test('classic preset has no Google Fonts link in generated HTML', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="font-preset"][value="classic"]');
     await snap(page, testInfo, 'preset-classic-selected');
     await page.fill('#md-input', MD_SHORT);
@@ -403,7 +394,6 @@ test.describe('Typography Presets', () => {
   });
 
   test('system preset has no Google Fonts link in generated HTML', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="font-preset"][value="system"]');
     await page.fill('#md-input', MD_SHORT);
     await page.click('button.btn-primary');
@@ -424,7 +414,6 @@ test.describe('Color Presets', () => {
   });
 
   test('linear preset changes the generated accent token', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="color-preset"][value="linear"]');
     await snap(page, testInfo, 'color-linear-selected');
     const frame = await renderMarkdown(page, MD_SINGLE_H1_MANY_H2);
@@ -436,7 +425,6 @@ test.describe('Color Presets', () => {
   });
 
   test('apple preset changes the generated accent token', async ({ page }, testInfo) => {
-    await page.click('#settings-btn');
     await page.click('[name="color-preset"][value="apple"]');
     const frame = await renderMarkdown(page, MD_SHORT);
     const accent = await frame.locator('body').evaluate(() =>
