@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitiva. — Markdown docs reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%}
+:root{
+  --paper:oklch(0.985 0.005 80);
+  --surface:oklch(1 0 0);
+  --surface2:oklch(0.97 0.008 80);
+  --rule:oklch(0.87 0.01 60);
+  --border:rgba(0,0,0,0.07);
+  --border-hi:rgba(0,0,0,0.15);
+  --ink:oklch(0.18 0.01 60);
+  --muted:oklch(0.50 0.01 60);
+  --faint:oklch(0.72 0.01 60);
+  --accent:oklch(0.55 0.18 28);
+  --accent-soft:oklch(0.95 0.035 30);
+}
+@media(prefers-color-scheme:dark){:root{
+  --paper:oklch(0.16 0.01 60);
+  --surface:oklch(0.19 0.012 60);
+  --surface2:oklch(0.22 0.012 60);
+  --rule:oklch(0.27 0.01 60);
+  --border:rgba(255,255,255,0.08);
+  --border-hi:rgba(255,255,255,0.16);
+  --ink:oklch(0.91 0.005 60);
+  --muted:oklch(0.65 0.008 60);
+  --faint:oklch(0.42 0.008 60);
+  --accent:oklch(0.72 0.14 28);
+  --accent-soft:oklch(0.25 0.06 28);
+}}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper);color:var(--ink);
+  font-size:15px;line-height:1.65;
+}
+
+/* ---- Layout ---- */
+.page{max-width:860px;margin:0 auto;padding:0 24px 100px}
+
+/* ---- Header ---- */
+header{
+  padding:52px 0 44px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:64px;
+}
+.brand{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:26px;font-weight:700;
+  color:var(--ink);letter-spacing:-0.5px;
+  margin-bottom:18px;
+}
+.brand .dot{color:#dc2626}
+h1{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:clamp(32px,5vw,52px);
+  font-weight:700;letter-spacing:-1.5px;
+  line-height:1.08;color:var(--ink);
+  text-wrap:balance;margin-bottom:18px;
+}
+.lead{
+  font-size:17px;color:var(--muted);
+  line-height:1.7;max-width:560px;
+}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.btn-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:38px;padding:8px 15px;border-radius:8px;
+  border:1px solid var(--border);text-decoration:none;
+  font-size:13px;font-weight:600;color:var(--muted);
+  transition:background 0.13s,border-color 0.13s,color 0.13s;
+}
+.btn-link:hover{background:var(--surface2);border-color:var(--border-hi);color:var(--ink)}
+.btn-link.primary{background:var(--accent);border-color:transparent;color:#fff}
+.btn-link.primary:hover{filter:brightness(1.08)}
+
+/* ---- Tools grid ---- */
+.tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:72px;
+}
+@media(max-width:600px){.tools{grid-template-columns:1fr}}
+
+.tool-card{
+  display:flex;flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;padding:28px 28px 24px;
+  text-decoration:none;color:inherit;
+  transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s;
+}
+.tool-card:hover{
+  border-color:var(--border-hi);
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(0,0,0,0.07);
+}
+.tool-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px;
+}
+.tool-name{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:22px;font-weight:700;
+  letter-spacing:-0.4px;color:var(--ink);
+  margin-bottom:10px;
+}
+.tool-desc{
+  font-size:14px;color:var(--muted);
+  line-height:1.65;flex:1;margin-bottom:20px;
+}
+.tool-cta{
+  font-size:13px;font-weight:600;
+  color:var(--accent);
+  display:flex;align-items:center;gap:6px;
+}
+.tool-cta svg{transition:transform 0.15s}
+.tool-card:hover .tool-cta svg{transform:translateX(3px)}
+
+/* ---- How it works ---- */
+.section-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:20px;
+}
+.steps{
+  display:flex;flex-direction:column;
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  margin-bottom:72px;
+}
+.step{
+  display:flex;align-items:flex-start;gap:18px;
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;
+  color:var(--accent);
+  background:var(--accent-soft);
+  border-radius:6px;padding:3px 8px;
+  flex-shrink:0;margin-top:2px;
+  letter-spacing:0.04em;
+}
+.step-body h3{
+  font-size:14px;font-weight:600;color:var(--ink);
+  margin-bottom:4px;
+}
+.step-body p{font-size:13.5px;color:var(--muted);line-height:1.6}
+.step-body code{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  background:var(--surface2);border:1px solid var(--border);
+  padding:1px 5px;border-radius:3px;color:var(--ink);
+}
+
+/* ---- Prompt section ---- */
+.prompt-box{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px 28px;
+  margin-bottom:72px;
+}
+.prompt-header{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;gap:12px;flex-wrap:wrap;
+}
+.prompt-title{
+  font-size:15px;font-weight:600;color:var(--ink);
+}
+.prompt-desc{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+
+.btn{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:13px;font-weight:500;
+  padding:8px 16px;border-radius:8px;
+  border:1px solid var(--border);cursor:pointer;
+  transition:background 0.13s,border-color 0.13s;
+  white-space:nowrap;background:transparent;color:var(--muted);
+}
+.btn:hover{background:var(--surface2);border-color:var(--border-hi);color:var(--ink)}
+.btn-accent{
+  background:var(--accent);color:#fff;
+  border-color:transparent;font-weight:600;
+}
+.btn-accent:hover{filter:brightness(1.1)}
+
+/* ---- Footer ---- */
+footer{
+  padding-top:32px;border-top:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--faint);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+footer a{color:var(--faint);text-decoration:none}
+footer a:hover{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand">Cognitiva<span class="dot">.</span></div>
+    <h1>Markdown<br>docs reader</h1>
+    <p class="lead">Use your usual chat app to shape rough material into markdown, then paste it into Cognitiva to read it as a clean, navigable documentation page.</p>
+    <div class="header-actions">
+      <a class="btn-link primary" href="renderer.html">Open renderer</a>
+      <a class="btn-link" href="#flow">See workflow</a>
+    </div>
+  </header>
+
+  <!-- Tools -->
+  <div class="section-label">Tools</div>
+  <div class="tools">
+
+    <a class="tool-card" href="renderer.html">
+      <div class="tool-tag">App</div>
+      <div class="tool-name">Markdown Renderer</div>
+      <p class="tool-desc">Paste markdown, get a paginated 3-column doc site. Each <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> becomes a sidebar page. Includes an optional prompt if you want help preparing source text elsewhere.</p>
+      <span class="tool-cta">
+        Open renderer
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="template.html">
+      <div class="tool-tag">Reference</div>
+      <div class="tool-name">Doc Template</div>
+      <p class="tool-desc">The reference HTML template for 3-column markdown docs. Same shell as the renderer output: collapsible sidebar, right TOC with scroll-spy, warm paper palette, light/dark.</p>
+      <span class="tool-cta">
+        View template
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+      </span>
+    </a>
+
+  </div>
+
+  <!-- How it works -->
+  <div class="section-label" id="flow">How it works</div>
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">01</span>
+      <div class="step-body">
+        <h3>Copy the prompt</h3>
+        <p>Use the prompt when your source material is rough, long, or unstructured. It tells your chat app how to produce markdown that Cognitiva can render well.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">02</span>
+      <div class="step-body">
+        <h3>Generate or clean markdown</h3>
+        <p>Paste the prompt and your source text into any LLM. Iterate there until the result has clear <code># H1</code> pages and useful <code>## H2</code> sections.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">03</span>
+      <div class="step-body">
+        <h3>Paste into Cognitiva</h3>
+        <p>Bring the final markdown into the renderer. You can also skip the prompt entirely if you already have good markdown.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">04</span>
+      <div class="step-body">
+        <h3>Render and share</h3>
+        <p>Cognitiva turns headings into navigation and gives you a readable doc with sidebar pages, right TOC, previous/next navigation, and downloadable HTML.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt -->
+  <div class="section-label">The prompt</div>
+  <div class="prompt-box">
+    <div class="prompt-header">
+      <span class="prompt-title">Optional rewrite prompt</span>
+      <button class="btn btn-accent" id="copy-btn" onclick="copyPrompt()">Copy prompt</button>
+    </div>
+    <p class="prompt-desc">This is the bridge between chat and Cognitiva. It asks any LLM to produce structured markdown optimized for the renderer's <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px"># H1</code> page model. Paste your source text after the <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px">---</code> at the end.</p>
+  </div>
+
+  <footer>
+    <span>Cognitiva<span style="color:#dc2626">.</span> &nbsp;·&nbsp; markdown docs reader</span>
+    <span>
+      <a href="renderer.html">Renderer →</a>
+      &nbsp;·&nbsp;
+      <a href="template.html">Template →</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/franciscobeccaria/cognitiva-docs" target="_blank">GitHub →</a>
+    </span>
+  </footer>
+
+</div>
+
+<template id="prompt-tpl">Tomá el texto que te voy a pasar y reescribilo como una documentación larga, clara y navegable.
+
+## Objetivo
+
+Que el resultado mantenga la naturaleza de texto largo, pero más escaneable, más claro, más compacto y mejor editado. Sin componentes visuales especiales ni bloques custom. Solo markdown bien usado.
+
+## Qué tenés que hacer
+
+- Resumí y reorganizá el texto.
+- Conservá los conceptos, patrones, nombres y relaciones importantes.
+- Recortá redundancias, repeticiones y desarrollos innecesarios.
+- No resumas de más, pero tampoco lo hagas innecesariamente largo.
+- Ordená el contenido con una progresión lógica.
+- Agregá una introducción breve que funcione como resumen inicial dentro de la primera página.
+- Agregá una conclusión obligatoria que cierre y sintetice bien.
+- Agregá ejemplos naturales de la vida real cuando ayuden a entender conceptos abstractos o densos.
+
+## Regla de longitud
+
+- Priorizá una compresión editorial natural.
+- Recortá reformulaciones equivalentes, transiciones innecesarias y párrafos que repitan la misma idea.
+- Si una idea ya quedó clara, no la vuelvas a desarrollar sin aportar algo nuevo.
+- No desarrolles todas las secciones con la misma profundidad: expandí las ideas centrales y comprimí las secundarias.
+- Cuando dudes entre desarrollar más o comprimir mejor, priorizá comprimir sin perder conceptos clave.
+- Evitá extenderte solo por prolijidad estructural.
+- No agregues secciones, subsecciones o bloques extra si no mejoran claramente la comprensión.
+
+## Reglas de estilo
+
+- Escribí como documentación clara para leer, no como apuntes sueltos.
+- Priorizá claridad, fluidez y buena sintaxis.
+- Evitá tono excesivamente académico o rebuscado.
+- No agregues relleno.
+- El cuerpo principal debe seguir siendo prosa, pero no abuses de párrafos largos.
+
+## Títulos y navegación
+
+- Los títulos deben ser cortos, claros y escaneables (idealmente 3–6 palabras).
+- Evitá títulos excesivamente largos, abstractos o cargados.
+
+## Uso de markdown
+
+Usá markdown no solo para formatear, sino para mejorar la lectura.
+
+Priorizá:
+- **negritas** para conceptos clave
+- listas cuando ayuden a sintetizar, comparar o separar ideas
+- tablas cuando compriman mejor que un párrafo
+- blockquotes para frases o ideas importantes
+- ejemplos separados visualmente cuando aporten claridad
+
+Evitá:
+- bloques muy largos de texto corrido
+- usar listas por decorar
+- convertir todo en bullets
+- recursos de markdown que no reduzcan densidad ni mejoren comprensión
+
+## Reglas de balance
+
+- Mantené el formato de texto largo, pero con mejor respiración visual.
+- No dejes más de 2 o 3 párrafos seguidos sin un corte útil: subtítulo, lista, tabla, cita o ejemplo.
+- En secciones abstractas, incluí al menos un ejemplo concreto.
+- Si una comparación se entiende mejor en tabla, usá tabla. Si una idea se entiende mejor en lista, usá lista. Si una idea necesita desarrollo, usá prosa.
+- No sacrifiques compresión por estructura.
+
+## Estructura de salida
+
+Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice** — se genera automáticamente a partir de los H1.
+
+Jerarquía:
+- `# H1` → página (usá entre 3 y 6 en total, según la longitud del tema)
+- `## H2` → sección dentro de la página (aparece en el TOC lateral derecho)
+- `### H3` → subsección, solo si hay 2+ sub-temas claramente distintos
+
+Estructura obligatoria:
+- Primera página: `# [Título del documento]` — introducción y resumen inicial como secciones `## H2`
+- Páginas de contenido: una `# H1` por cada grupo temático principal
+- Última página: `# Conclusión`
+
+---
+
+El texto a reescribir es el siguiente:
+
+---
+</template>
+
+<script>
+function copyPrompt() {
+  var text = document.getElementById('prompt-tpl').innerHTML
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').trim();
+  var btn = document.getElementById('copy-btn');
+  function done() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta); done();
+  }
+}
+</script>
+</body>
+</html>
