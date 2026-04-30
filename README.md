@@ -29,3 +29,11 @@ Reference HTML template for markdown-only documentation pages. Same 3-column lay
 ## Live site
 
 [franciscobeccaria.github.io/cognitiva-docs](https://franciscobeccaria.github.io/cognitiva-docs/)
+
+## PR previews
+
+Pull requests deploy the static HTML app to GitHub Pages under:
+
+`/previews/pr-<number>/`
+
+The preview workflow comments the exact URLs for the app, renderer, and template back into the PR.
