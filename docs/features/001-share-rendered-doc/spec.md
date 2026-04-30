@@ -40,27 +40,27 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 ### Share viewing (recipient side)
 
 - AC-11: When anyone opens a valid share URL, they see the rendered doc identical to what the sharer saw, with all CSS applied.
-- AC-12: The shared page renders correctly even if the cognitiva-docs main app is unavailable. Only the view-tracking beacon depends on the Worker being live.
+- AC-12: The shared page renders correctly even if the cognitiva-docs main app is unavailable. Only the view-tracking beacon depends on the AWS share API being live.
 - AC-13: Opening a share URL in a browser that executes JavaScript counts as one view, which resets the 6-month expiry timer for that share.
 - AC-14: Opening a share URL whose backing data has been removed by the cleanup job shows a "This share has expired or no longer exists" message instead of the doc.
 
 ### URL structure
 
-- AC-15: Share URLs have the form `https://pub-<bucket-id>.r2.dev/<slug>.html` where `<slug>` is a 12-character random ID drawn from a case-sensitive alphanumeric alphabet.
+- AC-15: Share URLs have the form `https://<cloudfront-domain>/<slug>.html` where `<slug>` is a 12-character random ID drawn from a case-sensitive alphanumeric alphabet.
 
 ### Security
 
 - AC-16: The HTML produced from the markdown is sanitized by DOMPurify with default config before being uploaded. Sanitization blocks `<script>` tags, inline event handlers, `javascript:` URLs, and other XSS vectors.
-- AC-17: Shared HTML is served from `pub-<bucket-id>.r2.dev`, a different origin from the cognitiva-docs main app at `franciscobeccaria.github.io`. A malicious doc cannot reach the main app's storage or cookies under the browser's same-origin policy.
-- AC-18: The Worker rejects share-creation requests whose `Origin` header does not match the cognitiva-docs main app origin.
-- AC-19: The Worker enforces a per-IP rate limit of at most 10 share creations per hour. Over-limit requests return HTTP 429 with a clear error message and a `Retry-After` header.
-- AC-20: The Worker requires a valid Cloudflare Turnstile token on each share-creation request. Missing or invalid tokens are rejected with HTTP 403.
+- AC-17: Shared HTML is served from a dedicated CloudFront distribution backed by S3, a different origin from the cognitiva-docs main app at `franciscobeccaria.github.io`. A malicious doc cannot reach the main app's storage or cookies under the browser's same-origin policy.
+- AC-18: The AWS share API rejects share-creation requests whose `Origin` header does not match the cognitiva-docs main app origin.
+- AC-19: The AWS share API enforces a per-IP rate limit of at most 10 share creations per hour. Over-limit requests return HTTP 429 with a clear error message and a `Retry-After` header.
+- AC-20: The AWS share API requires a valid Cloudflare Turnstile token on each share-creation request. Missing or invalid tokens are rejected with HTTP 403.
 
 ### Lifespan
 
 - AC-21: A share is deleted after 6 consecutive months without views. For shares with zero views, the 6-month timer starts at creation.
-- AC-22: View tracking happens via a single fetch from the share-viewer page to a Worker `/touch` endpoint on page load. Failure of the touch fetch does not prevent the page from rendering.
-- AC-23: The cleanup process runs at least once per day on a Cloudflare Cron Trigger and removes both the R2 file and the corresponding metadata for any expired share.
+- AC-22: View tracking happens via a single fetch from the share-viewer page to an AWS `/touch` endpoint on page load. Failure of the touch fetch does not prevent the page from rendering.
+- AC-23: The cleanup process runs at least once per day on an EventBridge-scheduled Lambda and removes both the S3 file and the corresponding DynamoDB metadata for any expired share.
 
 ---
 
@@ -71,14 +71,14 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 - **Source markdown is 1 MB + 1 byte:** Rejected (boundary exclusive).
 - **localStorage is full or unavailable:** Share creation succeeds; the new share is not appended to the past-shares list. A toast informs the user that the share was created but could not be saved locally.
 - **localStorage is cleared between sessions:** Past shares list appears empty. The always-visible note explains why.
-- **Slug collision:** Worker detects collision on R2 write, generates a new slug, retries up to 3 times. If all retries collide (vanishingly unlikely), returns 500 with "Could not generate unique slug, please retry".
+- **Slug collision:** The AWS share API detects collision on S3 write, generates a new slug, retries up to 3 times. If all retries collide (vanishingly unlikely), returns 500 with "Could not generate unique slug, please retry".
 - **Concurrent views from many recipients:** All views update `last_viewed_at` for the same slug; last-write-wins is acceptable since expiry granularity is in months.
 - **Share viewed once and never again:** Deleted 6 months after that view.
 - **Share never viewed:** Deleted 6 months after creation.
 - **Markdown contains XSS attempts:** Sanitized by DOMPurify before upload — never served to the recipient as executable code.
 - **User opens a share URL with a slug that does not exist:** The same "This share has expired or no longer exists" message is shown — no information is leaked about whether the slug was ever valid.
-- **Worker is down at view time:** Page still renders (HTML is fully self-contained); only the touch beacon fails, and the expiry timer does not reset for that view.
-- **R2 is down at view time:** The HTML file fails to load; the recipient sees the browser's standard "page not available" error.
+- **AWS share API is down at view time:** Page still renders (HTML is fully self-contained); only the touch beacon fails, and the expiry timer does not reset for that view.
+- **S3 or CloudFront is down at view time:** The HTML file fails to load; the recipient sees the browser's standard "page not available" error.
 - **Markdown contains image references with external URLs:** Images load only if their external hosts remain available. The shared HTML preserves whatever URLs the markdown referenced; this is documented in the sharer's modal but not engineered around.
 - **Bot or link-unfurler hits the share URL without executing JavaScript:** The touch beacon does not fire and the view is not counted. This is acceptable — only human-triggered loads with JS execution count.
 - **Recipient saves the HTML page locally and opens it offline:** The doc renders correctly. The touch fetch fails silently. Acceptable.
@@ -94,9 +94,9 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 - **Image uploads in markdown.** Current cognitiva-docs flow renders pasted markdown only; image references work only if their external URLs remain available. No image upload pipeline is engineered.
 - **View-count display to the sharer.** View timestamps are internal-only for expiry calculation; not surfaced.
 - **SEO, link previews, OpenGraph or Twitter Card customization.** Each share's HTML uses a static page title; no per-share metadata.
-- **Custom domain for share URLs.** v1 uses the free `pub-<bucket-id>.r2.dev` URL. Custom domain deferred.
+- **Custom domain for share URLs.** v1 can use the default CloudFront distribution domain. Custom domain deferred.
 - **Cross-device share history.** Past-shares list is per-browser only; deferred pending accounts.
-- **End-to-end encryption of share content.** Privacy model is "public-by-link" — anyone with the URL can read. The encrypted variant (key in URL hash, ciphertext on R2) was considered and explicitly rejected for v1 in favor of a simpler architecture.
+- **End-to-end encryption of share content.** Privacy model is "public-by-link" — anyone with the URL can read. The encrypted variant (key in URL hash, ciphertext in S3) was considered and explicitly rejected for v1 in favor of a simpler architecture.
 
 ---
 
@@ -106,10 +106,10 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 - [ ] Edge cases are covered by tests
 - [ ] Validation plan reviewed and complete
 - [ ] PR reviewed and approved
-- [ ] Cloudflare account created, R2 bucket provisioned, Worker deployed
+- [ ] AWS account created, S3 bucket provisioned, CloudFront distribution configured, API Gateway + Lambda deployed
 - [ ] Turnstile site keys configured for the cognitiva-docs origin
 - [ ] First end-to-end share verified manually (sharer creates, recipient opens, view registers, expiry timer touches)
-- [ ] Cleanup cron tested at least once against a seeded expired entry
+- [ ] Cleanup schedule tested at least once against a seeded expired entry
 
 ---
 
@@ -122,8 +122,8 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 3. The user clicks the "Share" button alongside the existing "Copy Markdown" button.
 4. A modal opens with a loading indicator.
 5. The browser renders the markdown to a self-contained HTML string (CSS inlined, identical to the existing renderer's output), sanitizes it through DOMPurify, and requests a Turnstile token in the background.
-6. The browser sends the sanitized HTML and the Turnstile token to the Worker.
-7. The Worker validates the origin, validates the Turnstile token, applies the rate limit, generates a unique slug, writes the HTML to R2 at `<slug>.html`, records metadata, and returns the slug.
+6. The browser sends the sanitized HTML and the Turnstile token to the AWS share API.
+7. The AWS share API validates the origin, validates the Turnstile token, applies the rate limit, generates a unique slug, writes the HTML to S3 at `<slug>.html`, records metadata in DynamoDB, and returns the slug.
 8. The modal updates from the loading state to the share-ready state, showing the URL, copy button, dates, the past-shares list, and the localStorage note.
 9. The new share is appended to localStorage.
 10. The user copies the URL and shares it through any channel they choose.
@@ -131,9 +131,9 @@ People using cognitiva-docs to render markdown into a navigable doc. Today, shar
 ### Recipient
 
 1. The recipient opens the share URL in any browser.
-2. The browser fetches the HTML file from R2 directly via Cloudflare's CDN.
+2. The browser fetches the HTML file from S3 through CloudFront.
 3. The page renders immediately with all CSS inlined.
-4. A single small fetch is sent to the Worker `/touch?slug=<slug>` to register the view. Page rendering does not depend on this fetch.
+4. A single small fetch is sent to the AWS `/touch?slug=<slug>` endpoint to register the view. Page rendering does not depend on this fetch.
 5. The recipient reads the doc.
 
 ---
@@ -152,7 +152,7 @@ Visual style follows the existing cognitiva-docs app — no separate component l
 |  Your share URL:                                 |
 |                                                  |
 |  +------------------------------------+ +------+ |
-|  | https://pub-xxxx.r2.dev/k4n9p7za...| | Copy | |
+|  | https://dxxxx.cloudfront.net/k4n9p7za... | Copy | |
 |  +------------------------------------+ +------+ |
 |                                                  |
 |  Created: 2026-04-26                             |
@@ -217,7 +217,7 @@ Visual style follows the existing cognitiva-docs app — no separate component l
 ### Share creation
 
 - **Method:** POST
-- **URL:** `https://<worker-name>.<account>.workers.dev/share`
+- **URL:** `https://<api-gateway-host>/share`
 - **Required headers:** `Origin: https://franciscobeccaria.github.io`, `Content-Type: application/json`
 - **Body fields:**
   - `html`: full sanitized HTML string (≤ 1 MB UTF-8 bytes).
@@ -233,33 +233,36 @@ Visual style follows the existing cognitiva-docs app — no separate component l
 ### View touch
 
 - **Method:** GET
-- **URL:** `https://<worker-name>.<account>.workers.dev/touch?slug=<slug>`
+- **URL:** `https://<api-gateway-host>/touch?slug=<slug>`
 - **No auth.**
 - **Side effect:** updates `last_viewed_at` for the slug.
 - **Response:** always `204 No Content`, including for unknown slugs (no information leak).
 
 ### Storage
 
-- **R2 bucket:** stores one HTML file per share at `<slug>.html`. Public read enabled. Each file is the fully rendered, CSS-inlined, DOMPurify-sanitized HTML, plus a small trusted touch-beacon script appended at upload time. The user's content is sanitized; the touch script is the project's own trusted code and is not subject to DOMPurify (it lives in a wrapper template, not inside the user-derived content block).
-- **KV namespace:** stores per-slug metadata as `{ "createdAt": "<ISO>", "lastViewedAt": "<ISO>" }`.
+- **S3 bucket:** stores one HTML file per share at `<slug>.html`. Public access stays behind CloudFront. Each file is the fully rendered, CSS-inlined, DOMPurify-sanitized HTML, plus a small trusted touch-beacon script appended at upload time. The user's content is sanitized; the touch script is the project's own trusted code and is not subject to DOMPurify (it lives in a wrapper template, not inside the user-derived content block).
+- **DynamoDB table:** stores per-slug metadata as `{ "createdAt": "<ISO>", "lastViewedAt": "<ISO>" }`.
 
 ### Slug format
 
 - 12 characters from the alphabet `[A-Za-z0-9]` (case-sensitive base62).
 - Total combinations: $$62^{12} \approx 3.2 \times 10^{21}$$.
 
-### Cleanup cron
+### Cleanup schedule
 
 - **Schedule:** at least once per day.
-- **Action:** for each KV entry, if $$\text{now} - \text{lastViewedAt} > 6 \text{ months}$$, delete both the R2 file and the KV entry.
+- **Action:** for each DynamoDB entry, if $$\text{now} - \text{lastViewedAt} > 6 \text{ months}$$, delete both the S3 file and the DynamoDB entry.
 
 ---
 
 ## Dependencies
 
-- Cloudflare account (free tier sufficient).
-- Cloudflare R2 bucket with public read access.
-- Cloudflare Workers + Workers KV namespace.
+- AWS account.
+- S3 bucket for rendered share HTML.
+- CloudFront distribution in front of the S3 bucket.
+- API Gateway + Lambda for `/share` and `/touch`.
+- DynamoDB for share metadata and rate limiting state.
+- EventBridge schedule for cleanup.
 - Cloudflare Turnstile site (free).
 - DOMPurify library (~22 KB minified, included in cognitiva-docs frontend).
 
@@ -269,5 +272,5 @@ Visual style follows the existing cognitiva-docs app — no separate component l
 
 | Question | Blocked if unresolved? | Who answers |
 |----------|----------------------|-------------|
-| Custom domain for share URLs (e.g., `share.cognitiva-docs.com`) — using `pub-xxxxx.r2.dev` for v1; can be added later by binding a domain to the bucket. | No — deferred | Francisco |
-| Should the Worker keep any access logs (slug, timestamp, IP) for abuse investigation, or run zero-logging? Default: zero-logging for MVP. | No — accept default | Francisco |
+| Custom domain for share URLs (e.g., `share.cognitiva-docs.com`) — v1 can use the default CloudFront domain and add a custom domain later. | No — deferred | Francisco |
+| Should the AWS share API keep any access logs (slug, timestamp, IP) for abuse investigation, or run zero-logging beyond default AWS service logs? Default: minimal logs for MVP. | No — accept default | Francisco |

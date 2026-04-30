@@ -4,8 +4,8 @@
 
 ## Technical Context
 
-- [ ] Cloudflare account setup (R2 bucket, Workers, KV namespace, Turnstile site, custom Worker route)
-- [ ] Worker code (`/share`, `/touch`, cleanup cron)
+- [ ] AWS account setup (S3 bucket, CloudFront distribution, API Gateway, Lambda, DynamoDB, EventBridge schedule)
+- [ ] AWS backend code (`/share`, `/touch`, cleanup job)
 - [ ] Frontend share button + modal
 - [ ] Frontend rendering pipeline integration (sanitize via DOMPurify, upload)
 - [ ] Touch-beacon wrapper template appended to uploaded HTML
