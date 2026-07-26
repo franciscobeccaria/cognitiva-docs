@@ -21,9 +21,9 @@
    DESIGN TOKENS - cognitiva-generator OKLCH (identical to docs-single.html)
    ============================================================ */
 :root {
-  --font-display: Georgia, 'Times New Roman', serif;
-  --font-body:    Georgia, 'Times New Roman', serif;
-  --font-mono:    Menlo, Monaco, Consolas, monospace;
+  --font-display: system-ui, -apple-system, sans-serif;
+  --font-body:    system-ui, -apple-system, sans-serif;
+  --font-mono:    ui-monospace, Menlo, Monaco, Consolas, monospace;
 
   --color-paper:       oklch(0.985 0.005 80);
   --color-surface:     oklch(1 0 0);
@@ -498,66 +498,27 @@ body {
 /* ============================================================
    SETTINGS - reader customization (font + accent), inline, no network
    ============================================================ */
-.cog-settings-btn{
-  position:fixed;top:16px;right:16px;z-index:1000;
-  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
-  background:var(--color-surface);border:1px solid var(--color-border);
-  border-radius:9px;color:var(--color-muted);cursor:pointer;
-  transition:color .13s,border-color .13s,background .13s;
+.cog-settings{
+  margin-top:auto;
+  padding:16px 16px 4px;
+  border-top:1px solid var(--color-border);
 }
-.cog-settings-btn:hover{color:var(--color-ink);border-color:var(--color-border-hi);background:var(--color-surface2)}
-.cog-settings-panel{
-  position:fixed;top:62px;right:16px;z-index:1000;
-  width:min(300px,calc(100vw - 32px));
-  background:var(--color-surface);border:1px solid var(--color-border);
-  border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,0.16);
-  padding:18px;display:none;
-}
-.cog-settings-panel.open{display:block}
-.cog-set-label{font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-faint);margin:0 0 9px}
-.cog-set-group+.cog-set-group{margin-top:16px;padding-top:16px;border-top:1px solid var(--color-border)}
-.cog-set-opts{display:flex;flex-wrap:wrap;gap:6px}
+.cog-set-group+.cog-set-group{margin-top:14px}
+.cog-set-label{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-faint);margin:0 0 8px}
+.cog-set-opts{display:flex;flex-wrap:wrap;gap:5px}
 .cog-set-opts button{
-  font-family:var(--font-body);font-size:12px;font-weight:500;
-  padding:6px 10px;border-radius:7px;border:1px solid var(--color-border);
+  font-family:var(--font-body);font-size:11px;font-weight:500;
+  padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);
   background:transparent;color:var(--color-muted);cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;transition:border-color .12s,background .12s,color .12s;
+  display:inline-flex;align-items:center;gap:5px;transition:border-color .12s,background .12s,color .12s;
 }
 .cog-set-opts button:hover{border-color:var(--color-border-hi);color:var(--color-ink)}
 .cog-set-opts button[aria-pressed="true"]{border-color:var(--color-accent);background:var(--color-accent-soft);color:var(--color-ink);font-weight:600}
-.cog-swatch{width:11px;height:11px;border-radius:50%;flex-shrink:0}
-@media print{.cog-settings-btn,.cog-settings-panel{display:none!important}}
+.cog-swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+@media print{.cog-settings{display:none!important}}
 </style>
 </head>
 <body>
-
-<!-- Reader settings (font + accent) - inline, no network, works inside Artifact CSP -->
-<button class="cog-settings-btn" id="cog-settings-btn" onclick="cogToggleSettings()" title="Reader settings" aria-label="Reader settings">
-  <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.5v2M8 12.5v2M14.5 8h-2M3.5 8h-2M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4M12.6 12.6l-1.4-1.4M4.8 4.8L3.4 3.4"/></svg>
-</button>
-<div class="cog-settings-panel" id="cog-settings-panel" role="dialog" aria-label="Reader settings">
-  <div class="cog-set-group">
-    <p class="cog-set-label">Typeface</p>
-    <div class="cog-set-opts" id="cog-font-opts">
-      <button data-font="editorial" aria-pressed="false">Editorial</button>
-      <button data-font="clean" aria-pressed="false">Clean</button>
-      <button data-font="classic" aria-pressed="true">Classic</button>
-      <button data-font="system" aria-pressed="false">System</button>
-    </div>
-  </div>
-  <div class="cog-set-group">
-    <p class="cog-set-label">Accent</p>
-    <div class="cog-set-opts" id="cog-color-opts">
-      <button data-color="cognitiva" aria-pressed="true"><span class="cog-swatch" style="background:#c94a35"></span>Cognitiva</button>
-      <button data-color="notion" aria-pressed="false"><span class="cog-swatch" style="background:#2f3437"></span>Notion</button>
-      <button data-color="linear" aria-pressed="false"><span class="cog-swatch" style="background:#5e6ad2"></span>Linear</button>
-      <button data-color="apple" aria-pressed="false"><span class="cog-swatch" style="background:#0071e3"></span>Apple</button>
-      <button data-color="github" aria-pressed="false"><span class="cog-swatch" style="background:#0969da"></span>GitHub</button>
-      <button data-color="stripe" aria-pressed="false"><span class="cog-swatch" style="background:#635bff"></span>Stripe</button>
-      <button data-color="figma" aria-pressed="false"><span class="cog-swatch" style="background:#a259ff"></span>Figma</button>
-    </div>
-  </div>
-</div>
 
 <!-- Floating reopen button -->
 <button class="sidebar-reopen" id="sidebar-reopen" onclick="toggleSidebar()" title="Open sidebar" aria-label="Open sidebar">
@@ -613,6 +574,31 @@ body {
         </div>
 
       </nav>
+
+      <!-- Reader settings (font + accent) - inline, no network, works inside Artifact CSP -->
+      <div class="cog-settings">
+        <div class="cog-set-group">
+          <p class="cog-set-label">Typeface</p>
+          <div class="cog-set-opts" id="cog-font-opts">
+            <button data-font="editorial" aria-pressed="false">Editorial</button>
+            <button data-font="clean" aria-pressed="false">Clean</button>
+            <button data-font="classic" aria-pressed="false">Classic</button>
+            <button data-font="system" aria-pressed="true">System</button>
+          </div>
+        </div>
+        <div class="cog-set-group">
+          <p class="cog-set-label">Accent</p>
+          <div class="cog-set-opts" id="cog-color-opts">
+            <button data-color="cognitiva" aria-pressed="true"><span class="cog-swatch" style="background:#c94a35"></span>Cognitiva</button>
+            <button data-color="notion" aria-pressed="false"><span class="cog-swatch" style="background:#2f3437"></span>Notion</button>
+            <button data-color="linear" aria-pressed="false"><span class="cog-swatch" style="background:#5e6ad2"></span>Linear</button>
+            <button data-color="apple" aria-pressed="false"><span class="cog-swatch" style="background:#0071e3"></span>Apple</button>
+            <button data-color="github" aria-pressed="false"><span class="cog-swatch" style="background:#0969da"></span>GitHub</button>
+            <button data-color="stripe" aria-pressed="false"><span class="cog-swatch" style="background:#635bff"></span>Stripe</button>
+            <button data-color="figma" aria-pressed="false"><span class="cog-swatch" style="background:#a259ff"></span>Figma</button>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>
 
@@ -1103,7 +1089,7 @@ var COG_COLORS = {
     dark:{paper:'oklch(0.16 0.016 320)',surface:'oklch(0.20 0.018 320)',surface2:'oklch(0.24 0.022 320)',surface3:'oklch(0.28 0.026 320)',rule:'oklch(0.31 0.022 320)',border:'rgba(255,255,255,0.09)',borderHi:'rgba(255,255,255,0.18)',ink:'oklch(0.92 0.006 320)',muted:'oklch(0.68 0.016 320)',faint:'oklch(0.47 0.016 320)',accent:'oklch(0.74 0.20 315)',accentSoft:'oklch(0.29 0.085 315)'}
   }
 };
-var cogState = { font:'classic', color:'cognitiva' };
+var cogState = { font:'system', color:'cognitiva' };
 var cogStyleEl = document.createElement('style');
 document.head.appendChild(cogStyleEl);
 
@@ -1129,21 +1115,11 @@ function cogSelect(kind, val){
   });
   cogApply();
 }
-function cogToggleSettings(){
-  document.getElementById('cog-settings-panel').classList.toggle('open');
-}
 document.getElementById('cog-font-opts').addEventListener('click', function(e){
   var b = e.target.closest('button'); if (b) cogSelect('font', b.dataset.font);
 });
 document.getElementById('cog-color-opts').addEventListener('click', function(e){
   var b = e.target.closest('button'); if (b) cogSelect('color', b.dataset.color);
-});
-document.addEventListener('click', function(e){
-  var panel = document.getElementById('cog-settings-panel');
-  var btn = document.getElementById('cog-settings-btn');
-  if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) {
-    panel.classList.remove('open');
-  }
 });
 cogApply();
 </script>
