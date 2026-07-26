@@ -266,7 +266,7 @@ Evitá:
 
 ## Estructura de salida
 
-Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice** — se genera automáticamente a partir de los H1.
+Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice**: se genera automáticamente a partir de los H1.
 
 Jerarquía:
 - `# H1` → página (usá entre 3 y 6 en total, según la longitud del tema)
@@ -274,7 +274,7 @@ Jerarquía:
 - `### H3` → subsección, solo si hay 2+ sub-temas claramente distintos
 
 Estructura obligatoria:
-- Primera página: `# [Título del documento]` — introducción y resumen inicial como secciones `## H2`
+- Primera página: `# [Título del documento]`, con introducción y resumen inicial como secciones `## H2`
 - Páginas de contenido: una `# H1` por cada grupo temático principal
 - Última página: `# Conclusión`
 
@@ -581,6 +581,7 @@ function buildHTML(pages, docTitle, splitLevel, fontPreset, colorPreset, docDesc
     '  <nav class="sidebar-nav"><div class="nav-section">' + navHTML + '</div></nav>',
     '  <div class="sidebar-footer">',
     '    <button class="download-html-btn" id="download-html-btn" onclick="window.parent.postMessage(\'download\',\'*\')">Download HTML</button>',
+    '    <a class="share-doc-link" href="index.html#share" target="_blank" rel="noopener">Share as a public link →</a>',
     '    <button class="copy-md-btn" id="copy-md-btn" onclick="copyMarkdown()">Copy markdown</button>',
     '    <button class="back-to-editor" onclick="window.parent.postMessage(\'back\',\'*\')">← Editor</button>',
     '    <a class="home-link" href="index.html" target="_parent">← Home</a>',
@@ -767,6 +768,8 @@ function templateCSS(fontPreset, colorPreset) {
   '.back-to-editor:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
   '.download-html-btn{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%}' +
   '.download-html-btn:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
+  '.share-doc-link{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-accent);background:transparent;border:1px solid var(--color-border);border-radius:7px;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%;text-decoration:none}' +
+  '.share-doc-link:hover{background:var(--color-accent-soft);border-color:var(--color-accent)}' +
   '.copy-md-btn{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%}' +
   '.copy-md-btn:hover{color:var(--color-muted);background:var(--color-surface2);border-color:var(--color-border-hi)}' +
   '.home-link{margin:0;padding:7px 12px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--color-faint);background:transparent;border:1px solid var(--color-border);border-radius:7px;cursor:pointer;text-align:left;transition:color 0.12s,background 0.12s,border-color 0.12s;display:block;width:100%;text-decoration:none}' +
@@ -1055,11 +1058,11 @@ function loadExample() {
 '\n' +
 'The **attention economy** treats human attention as a scarce resource to be harvested and sold. Platforms compete for time-on-screen, not for value delivered to the user.\n' +
 '\n' +
-'> Attention is the new oil. The companies that extract it most efficiently win — regardless of what they produce with it.\n' +
+'> Attention is the new oil. The companies that extract it most efficiently win, regardless of what they produce with it.\n' +
 '\n' +
 '### The scarcity logic\n' +
 '\n' +
-'Attention is finite. Every minute someone spends on one platform is a minute they are not spending on another. This creates a zero-sum competition — not for quality, but for time.\n' +
+'Attention is finite. Every minute someone spends on one platform is a minute they are not spending on another. This creates a zero-sum competition: not for quality, but for time.\n' +
 '\n' +
 'The business model is simple: capture attention, sell it to advertisers. The incentive is not to create value for users, but to maximize the amount of attention available to sell.\n' +
 '\n' +
@@ -1067,17 +1070,17 @@ function loadExample() {
 '\n' +
 'A platform whose revenue depends on time-on-screen has structural incentives to maximize that time, independent of whether that time is good for the user.\n' +
 '\n' +
-'This is not a conspiracy — it is a consequence of the business model. When engagement is the metric, engagement-maximizing design follows naturally.\n' +
+'This is not a conspiracy. It is a consequence of the business model. When engagement is the metric, engagement-maximizing design follows naturally.\n' +
 '\n' +
 '## How It Works\n' +
 '\n' +
-'Platforms use a small set of psychological mechanisms to capture and sustain attention. These mechanisms are not accidental — they are deliberately designed and continuously optimized.\n' +
+'Platforms use a small set of psychological mechanisms to capture and sustain attention. These mechanisms are not accidental. They are deliberately designed and continuously optimized.\n' +
 '\n' +
 '### Variable rewards\n' +
 '\n' +
-'The most powerful mechanism is the **variable reward schedule** — the same principle that makes slot machines addictive. When rewards are unpredictable, the behavior that seeks them becomes compulsive.\n' +
+'The most powerful mechanism is the **variable reward schedule**, the same principle that makes slot machines addictive. When rewards are unpredictable, the behavior that seeks them becomes compulsive.\n' +
 '\n' +
-'In a feed, the "reward" is a piece of content that is interesting, funny, or emotionally resonant. Because you cannot predict which scroll will deliver it, you keep scrolling. The ratio of interesting to uninteresting content is carefully tuned — too high and the behavior extinguishes; too low and users leave.\n' +
+'In a feed, the "reward" is a piece of content that is interesting, funny, or emotionally resonant. Because you cannot predict which scroll will deliver it, you keep scrolling. The ratio of interesting to uninteresting content is carefully tuned: too high and the behavior extinguishes, too low and users leave.\n' +
 '\n' +
 '### Social validation loops\n' +
 '\n' +
@@ -1089,7 +1092,7 @@ function loadExample() {
 '\n' +
 'Before infinite scroll, pagination created natural stopping points. Reaching the end of a page was a moment of decision: do I continue?\n' +
 '\n' +
-'Infinite scroll eliminates those moments. The content never ends, so the question "should I stop?" never arises naturally. The user must impose their own stopping point — against a system specifically designed to prevent them from finding one.\n' +
+'Infinite scroll eliminates those moments. The content never ends, so the question "should I stop?" never arises naturally. The user must impose their own stopping point, against a system specifically designed to prevent them from finding one.\n' +
 '\n' +
 '## The Real Cost\n' +
 '\n' +
@@ -1108,23 +1111,23 @@ function loadExample() {
 '\n' +
 '### Mental health effects\n' +
 '\n' +
-'41% of heavy social media users report feeling worse after use — not better. The correlation between heavy platform use and anxiety, depression, and loneliness is consistent across studies, though causality is debated.\n' +
+'41% of heavy social media users report feeling worse after use, not better. The correlation between heavy platform use and anxiety, depression, and loneliness is consistent across studies, though causality is debated.\n' +
 '\n' +
 'The more useful frame is not "does social media cause depression?" but "does this design pattern serve its users?" On that question, the evidence is fairly clear.\n' +
 '\n' +
 '## Design Principles\n' +
 '\n' +
-'Building software that respects attention requires deliberate choices at every level of the product. These principles are not idealistic — they are practical responses to the mechanisms described above.\n' +
+'Building software that respects attention requires deliberate choices at every level of the product. These principles are not idealistic. They are practical responses to the mechanisms described above.\n' +
 '\n' +
 '### Finite feeds\n' +
 '\n' +
 'Replace infinite scroll with paginated, bounded content. A feed that ends gives users a natural decision point and a sense of completion.\n' +
 '\n' +
-'**Example —** The Kindle app shows reading progress as a percentage and a time-remaining estimate. This small change transforms a potentially endless activity into one with a visible finish line — which makes users *more* likely to return, not less.\n' +
+'**Example.** The Kindle app shows reading progress as a percentage and a time-remaining estimate. This small change transforms a potentially endless activity into one with a visible finish line, which makes users *more* likely to return, not less.\n' +
 '\n' +
 '### No unread counts\n' +
 '\n' +
-'Remove notification badges. Unread counts create **ambient anxiety** — a low-level pressure to clear the number that persists even when the underlying content has no real value.\n' +
+'Remove notification badges. Unread counts create **ambient anxiety**, a low-level pressure to clear the number that persists even when the underlying content has no real value.\n' +
 '\n' +
 '```js\n' +
 '// Instead of a count that creates urgency:\n' +
@@ -1134,13 +1137,13 @@ function loadExample() {
 'badge.hasNew = lastActivity > lastVisit\n' +
 '```\n' +
 '\n' +
-'The second version conveys the same information — there is something new — without the compulsive pressure of a number that demands to be zeroed.\n' +
+'The second version conveys the same information (there is something new) without the compulsive pressure of a number that demands to be zeroed.\n' +
 '\n' +
 '### Explicit time signals\n' +
 '\n' +
 'Show users how long they have been in a session. Not as a dark pattern designed to trigger guilt, but as a neutral, accurate signal that lets them make an informed decision.\n' +
 '\n' +
-'The resistance to this principle is usually "it will reduce time-on-site." That is true. It will also increase user trust and long-term retention — the metrics that matter for products that are not trying to extract maximum short-term value.\n' +
+'The resistance to this principle is usually "it will reduce time-on-site." That is true. It will also increase user trust and long-term retention, the metrics that matter for products that are not trying to extract maximum short-term value.\n' +
 '\n' +
 '### Calm notifications\n' +
 '\n' +
@@ -1150,7 +1153,7 @@ function loadExample() {
 '\n' +
 '## Conclusion\n' +
 '\n' +
-'The attention economy is not a natural force. It is an architectural choice — one that was made, and can be unmade.\n' +
+'The attention economy is not a natural force. It is an architectural choice, one that was made, and can be unmade.\n' +
 '\n' +
 'The platforms that outlast the current cycle will be the ones users trust, because they chose metrics that align with user value rather than engagement time. **Finite design** beats infinite scroll in long-term retention. **Calm notifications** reduce anxiety without reducing utility.\n' +
 '\n' +

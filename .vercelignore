@@ -9,6 +9,7 @@ playwright-report
 .github
 aws
 docs
+skill
 *.config.js
 package.json
 package-lock.json

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognitiva. — Markdown docs reader</title>
+<title>Cognitiva. Markdown docs reader</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,6 +169,26 @@ h1{
   padding:1px 5px;border-radius:3px;color:var(--ink);
 }
 .step-body em{font-style:italic;color:var(--ink)}
+.share-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  margin-top:14px;padding:7px 13px;border-radius:8px;
+  border:1px solid var(--border);background:var(--surface2);
+  font-size:12.5px;font-weight:600;color:var(--accent);
+  text-decoration:none;
+  transition:border-color 0.13s,background 0.13s;
+}
+.share-btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.share-btn svg{transition:transform 0.15s}
+.share-btn:hover svg{transform:translateX(2px)}
+
+/* ---- Skill card ---- */
+.skill-card{
+  background:linear-gradient(180deg,var(--accent-soft) 0%,var(--surface) 60%);
+  border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:14px;padding:28px;margin-bottom:72px;
+}
+.skill-card .tool-desc{max-width:600px}
+.skill-card .share-btn{margin-top:4px}
 .step-tag{
   font-family:'JetBrains Mono',monospace;
   font-size:10px;font-weight:600;
@@ -305,28 +325,50 @@ footer a:hover{color:var(--muted)}
 
   <!-- Share as a public link -->
   <div class="section-label" id="share">Share as a public link</div>
-  <p class="share-intro">Cognitiva runs in your browser and the <strong>Download HTML</strong> button gives you a single self-contained file — there is no server storing your docs. To put a doc online and get a shareable URL, host that file yourself. Three easy ways, no build step required.</p>
+  <p class="share-intro">Cognitiva runs in your browser and the <strong>Download HTML</strong> button gives you a single self-contained file. There is no server storing your docs, so to put one online and get a shareable URL you host that file yourself. Three easy ways, no build step required.</p>
   <div class="steps">
     <div class="step">
       <span class="step-tag">Vercel</span>
       <div class="step-body">
-        <h3>Vercel Drop — permanent link</h3>
-        <p>Go to <code>vercel.com/drop</code>, sign in (free), and drag your downloaded <code>.html</code> onto the page. Pick a project name and deploy. You get a permanent <code>your-doc.vercel.app</code> URL. Best when you want the link to last.</p>
+        <h3>Vercel Drop: permanent link</h3>
+        <p>Sign in (free) and drag your downloaded <code>.html</code> onto the page. Pick a project name and deploy. You get a permanent <code>your-doc.vercel.app</code> URL. Best when you want the link to last.</p>
+        <a class="share-btn" href="https://vercel.com/drop" target="_blank" rel="noopener">Open Vercel Drop
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+        </a>
       </div>
     </div>
     <div class="step">
       <span class="step-tag">Netlify</span>
       <div class="step-body">
-        <h3>Netlify Drop — no account needed</h3>
-        <p>Go to <code>app.netlify.com/drop</code> and drop your <code>.html</code> — a live URL appears instantly, no sign-in. Heads up: unclaimed sites are deleted after ~1 hour, so create a free account and claim it if you want it to stick.</p>
+        <h3>Netlify Drop: no account needed</h3>
+        <p>Drop your <code>.html</code> and a live URL appears instantly, no sign-in. Heads up: unclaimed sites are deleted after about an hour, so create a free account and claim it if you want it to stick.</p>
+        <a class="share-btn" href="https://app.netlify.com/drop" target="_blank" rel="noopener">Open Netlify Drop
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+        </a>
       </div>
     </div>
     <div class="step">
       <span class="step-tag">Claude</span>
       <div class="step-body">
-        <h3>Claude Artifacts — if you already use Claude</h3>
-        <p>There is no file upload: open a chat at <code>claude.ai</code>, paste the doc's HTML so Claude renders it as an artifact, then use <strong>Publish</strong> → <em>Share &amp; copy link</em>. The link is public and needs no account to view. Note: artifacts block external resources, so a doc exported with web fonts may fall back to system fonts.</p>
+        <h3>Claude Artifacts: if you already use Claude</h3>
+        <p>There is no file upload. Paste the doc's HTML into a chat so Claude renders it as an artifact, then use <strong>Publish</strong> and <em>Share &amp; copy link</em>. The link is public and needs no account to view. Note: artifacts block external resources, so a doc exported with web fonts may fall back to system fonts.</p>
+        <a class="share-btn" href="https://claude.ai" target="_blank" rel="noopener">Open Claude
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+        </a>
       </div>
+    </div>
+  </div>
+
+  <!-- Skill -->
+  <div class="section-label" id="skill">Cognitiva as a skill</div>
+  <div class="skill-card">
+    <div class="skill-card-body">
+      <div class="tool-tag">Claude Code · Artifact</div>
+      <div class="tool-name">The Cognitiva skill</div>
+      <p class="tool-desc">Skip the paste step. Install the skill and ask Claude for a "Cognitiva artifact" of anything: a topic, some markdown, or content you already have. It generates a self-contained Artifact in this exact format, with the reader settings panel (typeface and accent) built in.</p>
+      <a class="share-btn" href="https://github.com/franciscobeccaria/cognitiva-docs/tree/main/skill" target="_blank" rel="noopener">Get the skill on GitHub
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+      </a>
     </div>
   </div>
 
@@ -346,6 +388,8 @@ footer a:hover{color:var(--muted)}
       <a href="renderer.html">Renderer →</a>
       &nbsp;·&nbsp;
       <a href="template.html">Template →</a>
+      &nbsp;·&nbsp;
+      <a href="#skill">Skill →</a>
       &nbsp;·&nbsp;
       <a href="https://github.com/franciscobeccaria/cognitiva-docs" target="_blank">GitHub →</a>
     </span>
@@ -420,7 +464,7 @@ Evitá:
 
 ## Estructura de salida
 
-Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice** — se genera automáticamente a partir de los H1.
+Usá `# H1` para dividir el documento en páginas. Cada H1 genera una entrada en el sidebar de navegación izquierdo. **No incluyas una sección de índice**: se genera automáticamente a partir de los H1.
 
 Jerarquía:
 - `# H1` → página (usá entre 3 y 6 en total, según la longitud del tema)
@@ -428,7 +472,7 @@ Jerarquía:
 - `### H3` → subsección, solo si hay 2+ sub-temas claramente distintos
 
 Estructura obligatoria:
-- Primera página: `# [Título del documento]` — introducción y resumen inicial como secciones `## H2`
+- Primera página: `# [Título del documento]`, con introducción y resumen inicial como secciones `## H2`
 - Páginas de contenido: una `# H1` por cada grupo temático principal
 - Última página: `# Conclusión`
 
