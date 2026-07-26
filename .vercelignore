@@ -1,0 +1,14 @@
+node_modules
+tests
+test-results
+test-markdowns
+playwright-report
+.playwright-mcp
+.local-share-store
+.next
+.github
+aws
+docs
+*.config.js
+package.json
+package-lock.json
