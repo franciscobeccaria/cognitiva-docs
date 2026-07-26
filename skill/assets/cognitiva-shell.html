@@ -494,28 +494,6 @@ body {
   .sidebar-right-col { display: none; }
   .main { padding: 24px 20px 60px; }
 }
-
-/* ============================================================
-   SETTINGS - reader customization (font + accent), inline, no network
-   ============================================================ */
-.cog-settings{
-  margin-top:auto;
-  padding:16px 16px 4px;
-  border-top:1px solid var(--color-border);
-}
-.cog-set-group+.cog-set-group{margin-top:14px}
-.cog-set-label{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-faint);margin:0 0 8px}
-.cog-set-opts{display:flex;flex-wrap:wrap;gap:5px}
-.cog-set-opts button{
-  font-family:var(--font-body);font-size:11px;font-weight:500;
-  padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);
-  background:transparent;color:var(--color-muted);cursor:pointer;
-  display:inline-flex;align-items:center;gap:5px;transition:border-color .12s,background .12s,color .12s;
-}
-.cog-set-opts button:hover{border-color:var(--color-border-hi);color:var(--color-ink)}
-.cog-set-opts button[aria-pressed="true"]{border-color:var(--color-accent);background:var(--color-accent-soft);color:var(--color-ink);font-weight:600}
-.cog-swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-@media print{.cog-settings{display:none!important}}
 </style>
 </head>
 <body>
@@ -574,31 +552,6 @@ body {
         </div>
 
       </nav>
-
-      <!-- Reader settings (font + accent) - inline, no network, works inside Artifact CSP -->
-      <div class="cog-settings">
-        <div class="cog-set-group">
-          <p class="cog-set-label">Typeface</p>
-          <div class="cog-set-opts" id="cog-font-opts">
-            <button data-font="editorial" aria-pressed="false">Editorial</button>
-            <button data-font="clean" aria-pressed="false">Clean</button>
-            <button data-font="classic" aria-pressed="false">Classic</button>
-            <button data-font="system" aria-pressed="true">System</button>
-          </div>
-        </div>
-        <div class="cog-set-group">
-          <p class="cog-set-label">Accent</p>
-          <div class="cog-set-opts" id="cog-color-opts">
-            <button data-color="cognitiva" aria-pressed="true"><span class="cog-swatch" style="background:#c94a35"></span>Cognitiva</button>
-            <button data-color="notion" aria-pressed="false"><span class="cog-swatch" style="background:#2f3437"></span>Notion</button>
-            <button data-color="linear" aria-pressed="false"><span class="cog-swatch" style="background:#5e6ad2"></span>Linear</button>
-            <button data-color="apple" aria-pressed="false"><span class="cog-swatch" style="background:#0071e3"></span>Apple</button>
-            <button data-color="github" aria-pressed="false"><span class="cog-swatch" style="background:#0969da"></span>GitHub</button>
-            <button data-color="stripe" aria-pressed="false"><span class="cog-swatch" style="background:#635bff"></span>Stripe</button>
-            <button data-color="figma" aria-pressed="false"><span class="cog-swatch" style="background:#a259ff"></span>Figma</button>
-          </div>
-        </div>
-      </div>
     </div>
   </aside>
 
@@ -919,9 +872,9 @@ output: expected result</code></pre>
 
 </div><!-- /layout -->
 
-<!-- Prism.js - code block syntax highlighting -->
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<!-- Prism.js - code block syntax highlighting (cdnjs is the only CDN the Artifact CSP allows) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
 <!-- App logic - identical to docs-single.html, Mermaid removed -->
 <script>
@@ -1048,80 +1001,6 @@ function toggleSidebar() {
 document.getElementById('sidebar-reopen').style.display = 'none';
 buildTOC('intro');
 
-/* ============================================================
-   READER SETTINGS - font + accent, applied live via CSS variables.
-   All fonts are native stacks (Google Fonts are blocked by the
-   Artifact CSP), so every option works with no network.
-   ============================================================ */
-var COG_FONTS = {
-  editorial: { d:"Georgia,'Times New Roman',serif",       b:"system-ui,-apple-system,sans-serif",   m:"ui-monospace,Menlo,Monaco,Consolas,monospace" },
-  clean:     { d:"system-ui,-apple-system,sans-serif",    b:"system-ui,-apple-system,sans-serif",   m:"ui-monospace,Menlo,Monaco,Consolas,monospace" },
-  classic:   { d:"Georgia,'Times New Roman',serif",       b:"Georgia,'Times New Roman',serif",      m:"Menlo,Monaco,Consolas,monospace" },
-  system:    { d:"system-ui,-apple-system,sans-serif",    b:"system-ui,-apple-system,sans-serif",   m:"ui-monospace,Menlo,Monaco,Consolas,monospace" }
-};
-var COG_COLORS = {
-  cognitiva: {
-    light:{paper:'oklch(0.985 0.005 80)',surface:'oklch(1 0 0)',surface2:'oklch(0.97 0.008 80)',surface3:'oklch(0.93 0.012 70)',rule:'oklch(0.87 0.01 60)',border:'rgba(0,0,0,0.07)',borderHi:'rgba(0,0,0,0.13)',ink:'oklch(0.18 0.01 60)',muted:'oklch(0.50 0.01 60)',faint:'oklch(0.72 0.01 60)',accent:'oklch(0.55 0.18 28)',accentSoft:'oklch(0.95 0.035 30)'},
-    dark:{paper:'oklch(0.16 0.01 60)',surface:'oklch(0.19 0.012 60)',surface2:'oklch(0.22 0.012 60)',surface3:'oklch(0.26 0.012 60)',rule:'oklch(0.27 0.01 60)',border:'rgba(255,255,255,0.08)',borderHi:'rgba(255,255,255,0.15)',ink:'oklch(0.91 0.005 60)',muted:'oklch(0.65 0.008 60)',faint:'oklch(0.42 0.008 60)',accent:'oklch(0.72 0.14 28)',accentSoft:'oklch(0.25 0.06 28)'}
-  },
-  notion: {
-    light:{paper:'oklch(0.985 0.004 88)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0.005 88)',surface3:'oklch(0.93 0.006 88)',rule:'oklch(0.88 0.006 88)',border:'rgba(55,53,47,0.10)',borderHi:'rgba(55,53,47,0.20)',ink:'oklch(0.23 0.006 85)',muted:'oklch(0.48 0.006 85)',faint:'oklch(0.70 0.006 85)',accent:'oklch(0.37 0.012 85)',accentSoft:'oklch(0.94 0.006 85)'},
-    dark:{paper:'oklch(0.19 0.006 85)',surface:'oklch(0.23 0.006 85)',surface2:'oklch(0.27 0.006 85)',surface3:'oklch(0.31 0.006 85)',rule:'oklch(0.34 0.006 85)',border:'rgba(255,255,255,0.09)',borderHi:'rgba(255,255,255,0.18)',ink:'oklch(0.90 0.004 85)',muted:'oklch(0.68 0.005 85)',faint:'oklch(0.46 0.005 85)',accent:'oklch(0.82 0.006 85)',accentSoft:'oklch(0.30 0.006 85)'}
-  },
-  linear: {
-    light:{paper:'oklch(0.985 0.006 285)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0.012 285)',surface3:'oklch(0.93 0.014 285)',rule:'oklch(0.87 0.014 285)',border:'rgba(36,39,58,0.09)',borderHi:'rgba(36,39,58,0.18)',ink:'oklch(0.20 0.014 285)',muted:'oklch(0.48 0.018 285)',faint:'oklch(0.70 0.018 285)',accent:'oklch(0.56 0.18 285)',accentSoft:'oklch(0.94 0.040 285)'},
-    dark:{paper:'oklch(0.16 0.018 285)',surface:'oklch(0.19 0.020 285)',surface2:'oklch(0.23 0.025 285)',surface3:'oklch(0.27 0.028 285)',rule:'oklch(0.30 0.025 285)',border:'rgba(255,255,255,0.08)',borderHi:'rgba(255,255,255,0.17)',ink:'oklch(0.92 0.006 285)',muted:'oklch(0.68 0.018 285)',faint:'oklch(0.47 0.018 285)',accent:'oklch(0.72 0.16 285)',accentSoft:'oklch(0.28 0.070 285)'}
-  },
-  apple: {
-    light:{paper:'oklch(0.985 0 0)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0 0)',surface3:'oklch(0.93 0 0)',rule:'oklch(0.88 0 0)',border:'rgba(0,0,0,0.08)',borderHi:'rgba(0,0,0,0.16)',ink:'oklch(0.18 0 0)',muted:'oklch(0.50 0 0)',faint:'oklch(0.72 0 0)',accent:'oklch(0.58 0.20 255)',accentSoft:'oklch(0.94 0.040 255)'},
-    dark:{paper:'oklch(0.15 0 0)',surface:'oklch(0.19 0 0)',surface2:'oklch(0.24 0 0)',surface3:'oklch(0.28 0 0)',rule:'oklch(0.31 0 0)',border:'rgba(255,255,255,0.09)',borderHi:'rgba(255,255,255,0.18)',ink:'oklch(0.92 0 0)',muted:'oklch(0.68 0 0)',faint:'oklch(0.46 0 0)',accent:'oklch(0.72 0.17 255)',accentSoft:'oklch(0.28 0.070 255)'}
-  },
-  github: {
-    light:{paper:'oklch(0.985 0.002 250)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0.004 250)',surface3:'oklch(0.93 0.006 250)',rule:'oklch(0.88 0.006 250)',border:'rgba(31,35,40,0.12)',borderHi:'rgba(31,35,40,0.22)',ink:'oklch(0.23 0.014 250)',muted:'oklch(0.50 0.018 250)',faint:'oklch(0.70 0.018 250)',accent:'oklch(0.52 0.16 255)',accentSoft:'oklch(0.94 0.035 255)'},
-    dark:{paper:'oklch(0.16 0.016 250)',surface:'oklch(0.20 0.018 250)',surface2:'oklch(0.24 0.020 250)',surface3:'oklch(0.28 0.022 250)',rule:'oklch(0.32 0.020 250)',border:'rgba(255,255,255,0.09)',borderHi:'rgba(255,255,255,0.18)',ink:'oklch(0.91 0.006 250)',muted:'oklch(0.68 0.014 250)',faint:'oklch(0.47 0.014 250)',accent:'oklch(0.69 0.15 255)',accentSoft:'oklch(0.27 0.065 255)'}
-  },
-  stripe: {
-    light:{paper:'oklch(0.985 0.006 270)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0.010 270)',surface3:'oklch(0.93 0.012 270)',rule:'oklch(0.87 0.012 270)',border:'rgba(12,17,54,0.10)',borderHi:'rgba(12,17,54,0.20)',ink:'oklch(0.20 0.025 270)',muted:'oklch(0.48 0.026 270)',faint:'oklch(0.70 0.024 270)',accent:'oklch(0.55 0.22 280)',accentSoft:'oklch(0.94 0.050 280)'},
-    dark:{paper:'oklch(0.15 0.026 270)',surface:'oklch(0.19 0.030 270)',surface2:'oklch(0.23 0.035 270)',surface3:'oklch(0.27 0.038 270)',rule:'oklch(0.30 0.035 270)',border:'rgba(255,255,255,0.08)',borderHi:'rgba(255,255,255,0.17)',ink:'oklch(0.92 0.006 270)',muted:'oklch(0.68 0.020 270)',faint:'oklch(0.47 0.020 270)',accent:'oklch(0.72 0.20 280)',accentSoft:'oklch(0.27 0.090 280)'}
-  },
-  figma: {
-    light:{paper:'oklch(0.985 0.005 320)',surface:'oklch(1 0 0)',surface2:'oklch(0.965 0.012 320)',surface3:'oklch(0.93 0.014 320)',rule:'oklch(0.87 0.014 320)',border:'rgba(30,30,30,0.10)',borderHi:'rgba(30,30,30,0.20)',ink:'oklch(0.20 0.010 320)',muted:'oklch(0.48 0.018 320)',faint:'oklch(0.70 0.018 320)',accent:'oklch(0.63 0.22 315)',accentSoft:'oklch(0.94 0.050 315)'},
-    dark:{paper:'oklch(0.16 0.016 320)',surface:'oklch(0.20 0.018 320)',surface2:'oklch(0.24 0.022 320)',surface3:'oklch(0.28 0.026 320)',rule:'oklch(0.31 0.022 320)',border:'rgba(255,255,255,0.09)',borderHi:'rgba(255,255,255,0.18)',ink:'oklch(0.92 0.006 320)',muted:'oklch(0.68 0.016 320)',faint:'oklch(0.47 0.016 320)',accent:'oklch(0.74 0.20 315)',accentSoft:'oklch(0.29 0.085 315)'}
-  }
-};
-var cogState = { font:'system', color:'cognitiva' };
-var cogStyleEl = document.createElement('style');
-document.head.appendChild(cogStyleEl);
-
-function cogColorVars(c){
-  return '--color-paper:'+c.paper+';--color-surface:'+c.surface+';--color-surface2:'+c.surface2+';'+
-    '--color-surface3:'+c.surface3+';--color-rule:'+c.rule+';--color-border:'+c.border+';'+
-    '--color-border-hi:'+c.borderHi+';--color-ink:'+c.ink+';--color-muted:'+c.muted+';'+
-    '--color-faint:'+c.faint+';--color-accent:'+c.accent+';--color-accent-soft:'+c.accentSoft+';';
-}
-function cogApply(){
-  var f = COG_FONTS[cogState.font] || COG_FONTS.classic;
-  var col = COG_COLORS[cogState.color] || COG_COLORS.cognitiva;
-  var fontVars = '--font-display:'+f.d+';--font-body:'+f.b+';--font-mono:'+f.m+';';
-  cogStyleEl.textContent =
-    ':root{'+fontVars+cogColorVars(col.light)+'}' +
-    '@media (prefers-color-scheme: dark){:root{'+cogColorVars(col.dark)+'}}';
-}
-function cogSelect(kind, val){
-  cogState[kind] = val;
-  var wrap = document.getElementById(kind === 'font' ? 'cog-font-opts' : 'cog-color-opts');
-  wrap.querySelectorAll('button').forEach(function(b){
-    b.setAttribute('aria-pressed', b.dataset[kind] === val ? 'true' : 'false');
-  });
-  cogApply();
-}
-document.getElementById('cog-font-opts').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if (b) cogSelect('font', b.dataset.font);
-});
-document.getElementById('cog-color-opts').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if (b) cogSelect('color', b.dataset.color);
-});
-cogApply();
 </script>
 </body>
 </html>
