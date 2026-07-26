@@ -168,6 +168,23 @@ h1{
   background:var(--surface2);border:1px solid var(--border);
   padding:1px 5px;border-radius:3px;color:var(--ink);
 }
+.step-body em{font-style:italic;color:var(--ink)}
+.step-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;
+  letter-spacing:0.04em;
+  color:var(--accent);
+  background:var(--accent-soft);
+  border-radius:6px;padding:3px 8px;
+  flex-shrink:0;margin-top:2px;
+  min-width:52px;text-align:center;
+}
+.share-intro{
+  font-size:14px;color:var(--muted);
+  line-height:1.7;max-width:620px;
+  margin:-4px 0 24px;
+}
+.share-intro strong{color:var(--ink);font-weight:600}
 
 /* ---- Prompt section ---- */
 .prompt-box{
@@ -281,7 +298,34 @@ footer a:hover{color:var(--muted)}
       <span class="step-num">04</span>
       <div class="step-body">
         <h3>Render and share</h3>
-        <p>Cognitiva turns headings into navigation and gives you a readable doc with sidebar pages, right TOC, previous/next navigation, and downloadable HTML.</p>
+        <p>Cognitiva turns headings into navigation and gives you a readable doc with sidebar pages, right TOC, previous/next navigation, and downloadable HTML. Want a public URL? <a href="#share" style="color:var(--accent);text-decoration:none;font-weight:600">See how to share →</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share as a public link -->
+  <div class="section-label" id="share">Share as a public link</div>
+  <p class="share-intro">Cognitiva runs in your browser and the <strong>Download HTML</strong> button gives you a single self-contained file — there is no server storing your docs. To put a doc online and get a shareable URL, host that file yourself. Three easy ways, no build step required.</p>
+  <div class="steps">
+    <div class="step">
+      <span class="step-tag">Vercel</span>
+      <div class="step-body">
+        <h3>Vercel Drop — permanent link</h3>
+        <p>Go to <code>vercel.com/drop</code>, sign in (free), and drag your downloaded <code>.html</code> onto the page. Pick a project name and deploy. You get a permanent <code>your-doc.vercel.app</code> URL. Best when you want the link to last.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-tag">Netlify</span>
+      <div class="step-body">
+        <h3>Netlify Drop — no account needed</h3>
+        <p>Go to <code>app.netlify.com/drop</code> and drop your <code>.html</code> — a live URL appears instantly, no sign-in. Heads up: unclaimed sites are deleted after ~1 hour, so create a free account and claim it if you want it to stick.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-tag">Claude</span>
+      <div class="step-body">
+        <h3>Claude Artifacts — if you already use Claude</h3>
+        <p>There is no file upload: open a chat at <code>claude.ai</code>, paste the doc's HTML so Claude renders it as an artifact, then use <strong>Publish</strong> → <em>Share &amp; copy link</em>. The link is public and needs no account to view. Note: artifacts block external resources, so a doc exported with web fonts may fall back to system fonts.</p>
       </div>
     </div>
   </div>
